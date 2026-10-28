@@ -1,0 +1,1719 @@
+<title>Campus FoodBank Simulator</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Unbounded:wght@500;600;700&family=Manrope:wght@400;500;700&family=JetBrains+Mono:wght@400;600&display=swap">
+<style>
+/* Layout: dark grid canvas, neon-lime highlight words, numbered cards with a raised lime middle card, floating stat chips over a curve */
+:root{
+ color-scheme:dark;
+ --bg:#0b0d0b; --bg2:#111411; --card:#161a16; --line:#262c26; --ink:#f2f5ee; --dim:#7d847c; --muted:#a9b0a7;
+ --lime:#c6ff1a; --lime-ink:#0b0d0b; --amber:#f2c14e; --coral:#ff7a59; --slate:#6f7b8f;
+ --display:"Unbounded",ui-sans-serif,system-ui,sans-serif;
+ --body:"Manrope",ui-sans-serif,system-ui,sans-serif;
+ --mono:"JetBrains Mono",ui-monospace,Menlo,monospace;
+}
+html{scroll-behavior:smooth}
+body{overflow-x:hidden;background:var(--bg);color:var(--ink);font:16px/1.65 var(--body);
+ background-image:linear-gradient(var(--line) 1px,transparent 1px),linear-gradient(90deg,var(--line) 1px,transparent 1px);
+ background-size:88px 88px;background-attachment:fixed;background-position:center top}
+body::after{content:"";position:fixed;inset:0;pointer-events:none;background:radial-gradient(ellipse at 50% 0%,transparent 0%,var(--bg) 70%);opacity:.85;z-index:-1}
+body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset-top,0px);z-index:10;background:var(--bg)}
+.wrap{max-width:1120px;margin:0 auto;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));position:relative;z-index:1}
+h1,h2,h3{font-family:var(--display);margin:0;text-wrap:balance;letter-spacing:-.01em}
+h1{font-size:clamp(2.1rem,5.4vw,3.6rem);line-height:1.12;font-weight:600}
+h2{font-size:clamp(1.6rem,3.6vw,2.4rem);line-height:1.2;font-weight:600}
+h3{font-size:1rem;font-weight:600;line-height:1.35}
+p{margin:0}
+.hl{color:var(--lime)} .gr{color:var(--dim)}
+.eyebrow{font:600 .78rem var(--display);letter-spacing:.14em;text-transform:uppercase;color:var(--ink)}
+.eyebrow b{color:var(--lime)}
+a{color:var(--lime)}
+a:focus-visible,summary:focus-visible,.btn:focus-visible{outline:2px solid var(--lime);outline-offset:3px}
+/* nav */
+nav{position:sticky;top:env(safe-area-inset-top,0px);z-index:5;background:color-mix(in srgb,var(--bg) 82%,transparent);backdrop-filter:blur(10px);border-bottom:1px solid var(--line)}
+nav .wrap{display:flex;align-items:center;justify-content:space-between;gap:16px;padding-block:16px}
+.logo{font:700 1.15rem var(--display);color:var(--lime);text-decoration:none;letter-spacing:.02em}
+.links{display:flex;gap:28px} .links a{color:var(--muted);text-decoration:none;font-size:.92rem} .links a:hover{color:var(--ink)}
+.btn{display:inline-flex;align-items:center;gap:10px;background:var(--lime);color:var(--lime-ink);font:600 .92rem var(--display);padding:11px 20px;border-radius:8px;text-decoration:none;border:0;white-space:nowrap;transition:transform .15s}
+.btn:hover{transform:translateY(-2px)}
+.btn.ghost{background:transparent;color:var(--muted);padding:11px 4px;font-family:var(--body)}
+/* hero */
+.hero{display:grid;grid-template-columns:1.1fr .9fr;gap:40px;align-items:center;padding-block:72px 56px;position:relative}
+.hero-copy{display:grid;gap:26px;min-width:0}
+.ghostword{position:absolute;right:-20px;top:40px;font:700 clamp(5rem,13vw,10rem) var(--display);color:transparent;-webkit-text-stroke:1px #222822;letter-spacing:-.02em;pointer-events:none;user-select:none;z-index:-1}
+.statrow{display:flex;align-items:center;gap:20px;flex-wrap:wrap;padding-bottom:24px;border-bottom:1px solid var(--line)}
+.chips{display:flex} .chips span{width:40px;height:40px;border-radius:50%;border:2px solid var(--bg);display:grid;place-items:center;font:600 .7rem var(--mono);color:var(--lime-ink);margin-left:-10px}
+.chips span:first-child{margin-left:0}
+.chips .k1{background:var(--lime)} .chips .k2{background:var(--amber)} .chips .k3{background:#9be0d3} .chips .k4{background:var(--coral)} .chips .k5{background:#b9b2ff}
+.bigstat{font:600 1.6rem var(--display)} .bigstat small{display:block;font:400 .82rem var(--body);color:var(--dim)}
+.intro{display:flex;gap:20px;align-items:center}
+.ring{flex:none;width:64px;height:64px;border-radius:50%;border:1.5px solid var(--lime);display:grid;place-items:center;position:relative}
+.ring::after{content:"↗";width:44px;height:44px;border-radius:50%;background:var(--lime);color:var(--lime-ink);display:grid;place-items:center;font:700 1.2rem var(--body);position:absolute;left:18px}
+.intro p{color:var(--muted);font-size:.95rem;max-width:44ch}
+/* phone */
+.stage{position:relative;overflow:hidden;display:grid;place-items:center;min-height:480px;min-width:0}
+.orbit{position:absolute;width:118%;height:46%;border:1.5px solid var(--lime);border-radius:50%;transform:rotate(-18deg);opacity:.7}
+.orbit.o2{width:80%;height:30%;transform:rotate(24deg) translateY(110px);opacity:.45}
+.orbit::before{content:"";position:absolute;width:12px;height:12px;border-radius:50%;background:var(--lime);left:6%;top:30%;box-shadow:0 0 14px var(--lime)}
+.phone{position:relative;width:250px;max-width:78%;aspect-ratio:9/18.5;background:#050605;border-radius:38px;border:7px solid #2a2f2a;box-shadow:0 40px 80px -20px rgba(198,255,26,.18),0 0 0 1px #3a403a;transform:rotate(8deg);padding:22px 14px;display:flex;flex-direction:column;gap:12px;overflow:hidden}
+.phone::before{content:"";position:absolute;top:8px;left:50%;transform:translateX(-50%);width:70px;height:18px;background:#000;border-radius:12px}
+.ph-top{text-align:center;padding-top:14px}
+.ph-top small{font:500 .62rem var(--mono);color:var(--dim);letter-spacing:.1em;text-transform:uppercase}
+.ph-top div{font:600 1.5rem var(--display)}
+.ph-card{background:var(--card);border-radius:14px;padding:12px;display:grid;gap:10px}
+.pb{display:grid;grid-template-columns:1fr auto;gap:4px;font-size:.68rem;color:var(--muted)}
+.pb b{color:var(--ink);font-family:var(--mono)}
+.pb i{grid-column:1/-1;height:6px;border-radius:3px;background:var(--lime);display:block}
+.ph-btns{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.ph-btns span{background:var(--lime);color:var(--lime-ink);border-radius:20px;text-align:center;font:600 .66rem var(--display);padding:8px 0}
+.ph-btns span+span{background:transparent;color:var(--lime);border:1px solid var(--lime)}
+.ph-spark{height:54px}
+.glow{position:absolute;bottom:-10px;width:70%;height:60px;background:radial-gradient(ellipse,rgba(198,255,26,.14),transparent 70%)}
+/* sections */
+section{padding-block:72px;display:grid;gap:36px}
+.split{display:grid;grid-template-columns:1.1fr .9fr;gap:40px;align-items:end}
+.split p{color:var(--dim);font-size:.95rem;max-width:52ch}
+.cards3{display:grid;grid-template-columns:repeat(3,1fr);border:1px solid var(--line);border-radius:16px;background:linear-gradient(180deg,#1a1f1a,#121512);position:relative}
+.c3{padding:32px 28px;display:grid;gap:14px;align-content:start;min-width:0}
+.c3 .n{font:600 1.15rem var(--display);color:var(--lime)}
+.c3 p{color:var(--dim);font-size:.9rem}
+.c3.hot{background:var(--lime);color:var(--lime-ink);border-radius:12px;margin:-28px 0;padding-block:44px;box-shadow:0 30px 60px -24px rgba(198,255,26,.35)}
+.c3.hot .n{color:var(--lime-ink)} .c3.hot p{color:#2d3a0a}
+.c3 .more{font:600 .85rem var(--display);color:inherit;text-decoration:none}
+.panel{background:linear-gradient(180deg,#171b17,#111411);border:1px solid var(--line);border-radius:16px;padding:28px;display:grid;gap:22px;min-width:0}
+.brow{display:grid;grid-template-columns:minmax(130px,200px) 1fr 76px;gap:16px;align-items:center}
+.bname{font-weight:700;font-size:.95rem;display:grid} .bname small,.bval small{font:400 .74rem var(--mono);color:var(--dim)}
+.btrack{display:flex;height:14px;border-radius:7px;overflow:hidden;background:var(--line)}
+.seg.s{background:var(--lime)} .seg.u{background:var(--amber)} .seg.n{background:var(--coral)} .seg.g{background:var(--slate)}
+.bval{font:600 1.05rem var(--display);text-align:right;display:grid;font-variant-numeric:tabular-nums}
+.legend{display:flex;flex-wrap:wrap;gap:18px;font-size:.84rem;color:var(--dim)}
+.legend i{display:inline-block;width:10px;height:10px;border-radius:50%;margin-right:7px;vertical-align:middle}
+.note{font-size:.86rem;color:var(--dim)}
+/* chart section */
+.chartwrap{display:grid;grid-template-columns:1.15fr .85fr;gap:48px;align-items:center}
+.chartbox{position:relative;min-width:0;padding-block:60px}
+.chartbox svg{width:100%;height:auto;display:block}
+.gl{stroke:#1f241f} .ax{fill:var(--dim);font:11px var(--mono)}
+.lm{stroke:var(--lime);stroke-width:3} .lb{stroke:var(--slate);stroke-width:2;stroke-dasharray:5 5}
+.dm{fill:var(--lime);stroke:var(--bg);stroke-width:3} .dbd{fill:var(--slate)}
+.float{position:absolute;background:color-mix(in srgb,var(--card) 92%,transparent);border:1px solid var(--line);border-radius:12px;padding:14px 16px;display:grid;gap:4px;max-width:240px;backdrop-filter:blur(6px)}
+.float b{font:600 1.05rem var(--display);border-left:2px solid var(--lime);padding-left:10px}
+.float span{font-size:.78rem;color:var(--dim)}
+.f1{top:0;left:4%} .f2{top:0;right:2%}
+.chart-copy{display:grid;gap:20px}
+.stars{letter-spacing:.5em;color:var(--ink)}
+.chart-copy p{color:var(--dim);font-size:.95rem} .chart-copy p strong{color:var(--ink)}
+/* evidence */
+.evgrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:16px}
+.ev{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:24px;display:grid;gap:10px;align-content:start;transition:border-color .2s}
+.ev:hover{border-color:var(--lime)}
+.evn{font:600 2rem var(--display);color:var(--lime)}
+.ev p{font-size:.92rem;color:var(--muted)} .ev a{font-size:.8rem;color:var(--dim);text-decoration:none} .ev a:hover{color:var(--lime)}
+/* table */
+.tablewrap{overflow-x:auto}
+table{border-collapse:collapse;width:100%;font-size:.95rem} td{padding:14px 10px;border-bottom:1px solid var(--line)}
+.num{font-family:var(--mono);font-variant-numeric:tabular-nums;color:var(--muted)}
+.pill{font:600 .68rem var(--mono);letter-spacing:.08em;text-transform:uppercase;padding:4px 10px;border-radius:999px;border:1px solid}
+.pill.evidence{background:var(--lime);color:var(--lime-ink);border-color:var(--lime)}
+.pill.justified{color:var(--lime);border-color:var(--lime)}
+.pill.assumption{color:var(--amber);border-color:color-mix(in srgb,var(--amber) 50%,transparent)}
+/* flow */
+.mermaidbox{background:#f3f6ee;border-radius:16px;padding:20px;overflow-x:auto}
+/* stages */
+ol.stages{list-style:none;margin:0;padding:0;display:grid;grid-template-columns:repeat(auto-fit,minmax(320px,1fr));gap:16px}
+ol.stages li{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:24px;display:grid;grid-template-columns:52px 1fr;gap:12px;min-width:0}
+ol.stages li:last-child{border-color:var(--lime)}
+.stn{font:600 1.1rem var(--display);color:var(--lime)}
+.stb{display:grid;gap:8px;min-width:0} .stb p{color:var(--muted);font-size:.9rem}
+.cpt{font:400 .76rem var(--mono)!important;color:var(--dim)!important}
+details summary{cursor:pointer;color:var(--lime);font-size:.86rem}
+pre{background:#070807;border:1px solid var(--line);border-radius:10px;padding:16px;overflow:auto;font:12.5px/1.55 var(--mono);color:#d7ddd3;max-height:520px;margin:10px 0 0}
+.qa{border-bottom:1px solid var(--line);padding:18px 0} .qa summary{color:var(--ink);font:600 1rem var(--body);list-style:none;display:flex;justify-content:space-between;gap:16px}
+.qa summary::after{content:"+";color:var(--lime);font:600 1.2rem var(--display)} .qa[open] summary::after{content:"−"}
+.qa summary::-webkit-details-marker{display:none}
+.qa p{margin-top:10px;color:var(--muted);max-width:70ch}
+.files{display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:12px}
+.files div{border:1px solid var(--line);border-radius:12px;padding:16px;font-size:.9rem;color:var(--muted);background:var(--bg2)}
+.files code{font:600 .85rem var(--mono);color:var(--lime);display:block;margin-bottom:4px}
+footer{border-top:1px solid var(--line);padding-block:32px 48px;font-size:.85rem;color:var(--dim);display:flex;justify-content:space-between;gap:16px;flex-wrap:wrap}
+@media (max-width:900px){.hero,.split,.chartwrap{grid-template-columns:1fr} .stage{min-height:420px} .links{display:none} .ghostword{display:none}}
+@media (max-width:720px){.cards3{grid-template-columns:1fr} .c3.hot{margin:0 12px} .brow{grid-template-columns:1fr 64px} .bname{grid-column:1/-1} .float{position:static;max-width:none} .chartbox{padding-block:0;display:grid;gap:12px} section{padding-block:48px}}
+@media (prefers-reduced-motion:reduce){html{scroll-behavior:auto} .btn{transition:none}}
+</style>
+
+<nav><div class="wrap">
+ <a class="logo" href="#top">FOODBANK.SIM</a>
+ <div class="links"><a href="#finding">Finding</a><a href="#evidence">Evidence</a><a href="#build">Build</a><a href="#qa">Q&amp;A</a></div>
+ <a class="btn" href="#build">View code</a>
+</div></nav>
+
+<div class="wrap" id="top">
+<header class="hero">
+ <div class="ghostword" aria-hidden="true">SIMPY</div>
+ <div class="hero-copy">
+  <div class="eyebrow">Keep students fed <b>!</b></div>
+  <h1>Not just <span class="gr">food,</span><br><span class="hl">the right food</span><br><span class="gr">for every</span> student.</h1>
+  <div class="statrow">
+   <div class="chips" aria-hidden="true"><span class="k1">GEN</span><span class="k2">VEG</span><span class="k3">HAL</span><span class="k4">CI</span><span class="k5">PY</span></div>
+   <div class="bigstat">53%<small>of Australian uni students food insecure (2024)</small></div>
+  </div>
+  <div class="intro"><div class="ring" aria-hidden="true"></div><p>A SimPy model of a campus food bank, set on the Swinburne Student Union FoodBank. It measures how many students leave with food they can actually eat.</p></div>
+ </div>
+ <div class="stage" aria-label="Phone preview of simulation results">
+  <div class="orbit"></div><div class="orbit o2"></div>
+  <div class="phone">
+   <div class="ph-top"><small>Suitable parcels</small><div>89.0%</div><small>matched stock · 20 runs</small></div>
+   <div class="ph-card"><div class="pb"><span>Baseline</span><b>84.0%</b><i style="width:84.0%"></i></div><div class="pb"><span>+1 volunteer</span><b>83.4%</b><i style="width:83.4%"></i></div><div class="pb"><span>Matched stock</span><b>89.0%</b><i style="width:89.0%"></i></div><div class="pb"><span>+1 vol &amp; matched</span><b>88.2%</b><i style="width:88.2%"></i></div></div>
+   <svg class="ph-spark" viewBox="0 0 200 54" aria-hidden="true"><path d="M0,44 C30,40 40,20 70,26 S110,8 140,14 S180,4 200,6" fill="none" stroke="#c6ff1a" stroke-width="2.5"/></svg>
+   <div class="ph-btns"><span>Run</span><span>Export</span></div>
+  </div>
+  <div class="glow"></div>
+ </div>
+</header>
+
+<section id="about">
+ <div class="split">
+  <h2>Your <span class="hl">evidence-based</span> <span class="gr">model of a</span> <span class="gr">food bank.</span></h2>
+  <p>Built for COS60018 Programming Principles and Practices. Eight stages, 178 lines, 16 tests, SimPy as the only library. Every model input is marked as evidence or assumption.</p>
+ </div>
+ <div class="cards3">
+  <div class="c3"><div class="n">01.</div><h3>The problem<br>is growing.</h3><p>Student food insecurity rose from 42% to 53% in two years. International students face higher odds.</p></div>
+  <div class="c3 hot"><div class="n">02.</div><h3>Food has to<br>fit the student.</h3><p>Halal and vegetarian stock can run out on its own. The model counts "got food" and "got food they can eat" separately.</p><a class="more" href="#finding">See the finding →</a></div>
+  <div class="c3"><div class="n">03.</div><h3>Tested and<br>repeatable.</h3><p>Fixed seeds, 20 runs per scenario, 95% confidence intervals, 16 pytest tests.</p></div>
+ </div>
+</section>
+
+<section id="finding">
+ <div class="split">
+  <h2><span class="gr">More volunteers</span> cut the queue. <span class="hl">The right mix</span> feeds more.</h2>
+  <p>The same 110 parcels in every scenario. Adding a volunteer drops the wait from 3.6 to 0.5 minutes but does not raise suitable outcomes. Re-balancing stock does.</p>
+ </div>
+ <div class="panel">
+  <div class="brow"><div class="bname">Baseline<small>2 vol · 3.6 min wait</small></div><div class="btrack"><span class="seg s" style="width:84.0%"></span><span class="seg u" style="width:7.7%"></span><span class="seg n" style="width:8.0%"></span><span class="seg g" style="width:0.2%"></span></div><div class="bval">84.0%<small>±3.2</small></div></div><div class="brow"><div class="bname">+1 volunteer<small>3 vol · 0.5 min wait</small></div><div class="btrack"><span class="seg s" style="width:83.4%"></span><span class="seg u" style="width:8.1%"></span><span class="seg n" style="width:8.5%"></span><span class="seg g" style="width:0.0%"></span></div><div class="bval">83.4%<small>±3.2</small></div></div><div class="brow"><div class="bname">Matched stock<small>2 vol · 3.6 min wait</small></div><div class="btrack"><span class="seg s" style="width:89.0%"></span><span class="seg u" style="width:1.6%"></span><span class="seg n" style="width:9.2%"></span><span class="seg g" style="width:0.2%"></span></div><div class="bval">89.0%<small>±2.9</small></div></div><div class="brow"><div class="bname">+1 vol &amp; matched<small>3 vol · 0.5 min wait</small></div><div class="btrack"><span class="seg s" style="width:88.2%"></span><span class="seg u" style="width:2.1%"></span><span class="seg n" style="width:9.7%"></span><span class="seg g" style="width:0.0%"></span></div><div class="bval">88.2%<small>±2.8</small></div></div>
+  <div class="legend"><span><i style="background:var(--lime)"></i>Suitable</span><span><i style="background:var(--amber)"></i>Unsuitable</span><span><i style="background:var(--coral)"></i>No food left</span><span><i style="background:var(--slate)"></i>Gave up waiting</span></div>
+  <p class="note">Average of 20 runs, ± 95% confidence interval on suitable %. Inputs are illustrative assumptions.</p>
+ </div>
+</section>
+
+<section id="experiment">
+ <div class="chartwrap">
+  <div class="chartbox">
+   <div class="float f1"><b>+5.0 pts</b><span>paired gain, 16 of 20 runs</span></div>
+   <svg viewBox="0 0 640 300" role="img" aria-label="Suitable percent by gap between arrivals"><defs><linearGradient id="ga" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#c6ff1a" stop-opacity=".28"/><stop offset="1" stop-color="#c6ff1a" stop-opacity="0"/></linearGradient></defs><line x1="48" x2="616" y1="260.0" y2="260.0" class="gl"/><text x="38" y="264.0" class="ax" text-anchor="end">50%</text><line x1="48" x2="616" y1="212.8" y2="212.8" class="gl"/><text x="38" y="216.8" class="ax" text-anchor="end">60%</text><line x1="48" x2="616" y1="165.6" y2="165.6" class="gl"/><text x="38" y="169.6" class="ax" text-anchor="end">70%</text><line x1="48" x2="616" y1="118.4" y2="118.4" class="gl"/><text x="38" y="122.4" class="ax" text-anchor="end">80%</text><line x1="48" x2="616" y1="71.2" y2="71.2" class="gl"/><text x="38" y="75.2" class="ax" text-anchor="end">90%</text><line x1="48" x2="616" y1="24.0" y2="24.0" class="gl"/><text x="38" y="28.0" class="ax" text-anchor="end">100%</text><text x="48.0" y="286" class="ax" text-anchor="middle">3.0 min</text><text x="190.0" y="286" class="ax" text-anchor="middle">2.0 min</text><text x="332.0" y="286" class="ax" text-anchor="middle">1.5 min</text><text x="474.0" y="286" class="ax" text-anchor="middle">1.2 min</text><text x="616.0" y="286" class="ax" text-anchor="middle">1.0 min</text><path d="M48.0,24.0 C119.0,24.0 119.0,28.248000000000026 190.0,28.248000000000026 C261.0,28.248000000000026 261.0,75.92 332.0,75.92 C403.0,75.92 403.0,154.27199999999996 474.0,154.27199999999996 C545.0,154.27199999999996 545.0,213.27200000000002 616.0,213.27200000000002 L616.0,260 L48.0,260 Z" fill="url(#ga)"/><path d="M48.0,24.944000000000013 C119.0,24.944000000000013 119.0,46.18400000000001 190.0,46.18400000000001 C261.0,46.18400000000001 261.0,99.52 332.0,99.52 C403.0,99.52 403.0,173.62400000000002 474.0,173.62400000000002 C545.0,173.62400000000002 545.0,230.736 616.0,230.736" class="lb" fill="none"/><path d="M48.0,24.0 C119.0,24.0 119.0,28.248000000000026 190.0,28.248000000000026 C261.0,28.248000000000026 261.0,75.92 332.0,75.92 C403.0,75.92 403.0,154.27199999999996 474.0,154.27199999999996 C545.0,154.27199999999996 545.0,213.27200000000002 616.0,213.27200000000002" class="lm" fill="none"/><circle cx="48.0" cy="24.0" r="5" class="dm"/><circle cx="190.0" cy="28.248000000000026" r="5" class="dm"/><circle cx="332.0" cy="75.92" r="5" class="dm"/><circle cx="474.0" cy="154.27199999999996" r="5" class="dm"/><circle cx="616.0" cy="213.27200000000002" r="5" class="dm"/><circle cx="48.0" cy="24.944000000000013" r="4" class="dbd"/><circle cx="190.0" cy="46.18400000000001" r="4" class="dbd"/><circle cx="332.0" cy="99.52" r="4" class="dbd"/><circle cx="474.0" cy="173.62400000000002" r="4" class="dbd"/><circle cx="616.0" cy="230.736" r="4" class="dbd"/></svg>
+   <div class="float f2"><b>1.4 ms / run</b><span>178 lines, SimPy only</span></div>
+  </div>
+  <div class="chart-copy">
+   <h2><span class="gr">Matching stock</span> matters <span class="hl">most</span> at medium demand.</h2>
+   <div class="stars" aria-hidden="true">★★★★</div>
+   <p>When the food bank is quiet, <strong>everyone is served</strong> either way. When it is very busy, <strong>total stock</strong> matters more than the mix.</p>
+   <p>Lime line: culturally matched stock. Dashed line: baseline. X axis: average minutes between arrivals, from quiet to busy.</p>
+   <div><a class="btn" href="#evidence">See the evidence →</a> <a class="btn ghost" href="#qa">Ask a question?</a></div>
+  </div>
+ </div>
+</section>
+
+<section id="evidence">
+ <div class="split"><h2><span class="gr">Why</span> <span class="hl">this problem.</span></h2><p>Six of the seventeen sources in docs/EVIDENCE.md. Each one is tied to a claim or a model setting.</p></div>
+ <div class="evgrid"><article class="ev"><div class="evn">53%</div><p>Australian uni students food insecure in 2024 (42% in 2022). International students at higher odds.</p><a href="https://doi.org/10.1002/hpja.70037" target="_blank" rel="noopener">Kent et al., 2025 ↗</a></article><article class="ev"><div class="evn">1 in 3</div><p>Australian households food insecure in the past year. Cost of living top concern for 91%.</p><a href="https://reports.foodbank.org.au/foodbank-hunger-report-2025/" target="_blank" rel="noopener">Foodbank Hunger Report 2025 ↗</a></article><article class="ev"><div class="evn">Culture</div><p>International students report a lack of culturally appropriate food and inefficient pantries.</p><a href="https://doi.org/10.1002/hpja.70080" target="_blank" rel="noopener">Leung et al., 2025 ↗</a></article><article class="ev"><div class="evn">10–1</div><p>SSU FoodBank: free, walk-in, weekdays. Sets the 180-minute session.</p><a href="https://ssu.org.au/services" target="_blank" rel="noopener">Swinburne Student Union ↗</a></article><article class="ev"><div class="evn">~15%</div><p>of undergraduates regularly go without food or necessities.</p><a href="https://pursuit.unimelb.edu.au/articles/financial-anxiety-widespread-among-university-students" target="_blank" rel="noopener">Universities Australia survey ↗</a></article><article class="ev"><div class="evn">DES</div><p>Simulation of Texas food banks, validated within 15% of real data.</p><a href="https://www.informs-sim.org/wsc22papers/160.pdf" target="_blank" rel="noopener">Kothamasu et al., 2022 ↗</a></article></div>
+</section>
+
+<section id="inputs">
+ <div class="split"><h2>Evidence <span class="gr">or</span> <span class="hl">assumption?</span></h2><p>The setting is real. The operating numbers are labelled guesses, ready to be replaced with SSU check-in data.</p></div>
+ <div class="panel tablewrap"><table><tr><td>Opening time</td><td class="num">180 min</td><td><span class="pill evidence">Evidence</span></td></tr><tr><td>Walk-in random arrivals</td><td class="num">Exponential gaps</td><td><span class="pill justified">Justified</span></td></tr><tr><td>Gap between arrivals</td><td class="num">1.5 min</td><td><span class="pill assumption">Assumption</span></td></tr><tr><td>Service time</td><td class="num">2.5 min</td><td><span class="pill assumption">Assumption</span></td></tr><tr><td>Patience</td><td class="num">20 min</td><td><span class="pill assumption">Assumption</span></td></tr><tr><td>Diet mix</td><td class="num">55 / 25 / 20 %</td><td><span class="pill assumption">Assumption</span></td></tr><tr><td>Stock</td><td class="num">110 parcels</td><td><span class="pill assumption">Assumption</span></td></tr></table></div>
+</section>
+
+<section id="flow">
+ <div class="split"><h2><span class="gr">One</span> student's <span class="hl">journey.</span></h2><p>Arrive, queue or give up, then get suitable food, unsuitable food or nothing.</p></div>
+ <div class="mermaidbox"><pre class="mermaid">flowchart TD
+    A([Start run]) --&gt; B[Load Config&lt;br/&gt;validate settings]
+    B --&gt; C[Create Environment,&lt;br/&gt;Pantry counter + stock]
+    C --&gt; D{{Arrivals loop}}
+    D --&gt;|wait random gap| E{Doors still open?}
+    E -- No --&gt; Z([Stop new arrivals])
+    E -- Yes --&gt; F[New student&lt;br/&gt;pick diet]
+    F --&gt; D
+    F --&gt; G{Volunteer free&lt;br/&gt;before max_wait?}
+    G -- No --&gt; H[outcome = gave_up]
+    G -- Yes --&gt; I[Pack parcel]
+    I --&gt; J{Stock for&lt;br/&gt;their diet?}
+    J -- Yes --&gt; K[outcome = suitable]
+    J -- No --&gt; L{General stock left&lt;br/&gt;and diet not general?}
+    L -- Yes --&gt; M[outcome = unsuitable]
+    L -- No --&gt; N[outcome = no_food]
+    H &amp; K &amp; M &amp; N --&gt; O[Save record]
+</pre></div>
+</section>
+
+<section id="build">
+ <div class="split"><h2><span class="hl">Eight stages,</span> <span class="gr">one commit</span> each.</h2><p>Each stage runs on its own. Stages 3 to 8 are merged through pull requests.</p></div>
+ <ol class="stages"><li><div class="stn">01.</div><div class="stb"><h3>Basic queue</h3><p>Students arrive at random and wait for one volunteer.</p><p class="cpt">Generators · Resource · timeout</p><details><summary>View stage1_basic_queue.py</summary><pre><code>&quot;&quot;&quot;
+Stage 1 - Basic queue.
+
+Goal: learn the core SimPy idea. Students arrive at random times and
+queue for ONE volunteer. We print what happens. No stock, no statistics.
+
+Concepts shown: generator functions, simpy.Environment, simpy.Resource,
+env.timeout, random arrival times.
+&quot;&quot;&quot;
+
+import random
+import simpy
+
+OPEN_MINUTES = 30       # short run so the output is readable
+MEAN_ARRIVAL_GAP = 1.5  # average minutes between students
+MEAN_SERVICE_TIME = 2.5 # average minutes to pack a parcel
+
+
+def student(env, sid, counter):
+    &quot;&quot;&quot;One student arrives, waits for the volunteer, gets served, leaves.&quot;&quot;&quot;
+    arrived = env.now
+    with counter.request() as req:
+        yield req  # wait in the queue
+        print(f&quot;{env.now:6.1f}  student {sid} served after {env.now - arrived:.1f} min wait&quot;)
+        yield env.timeout(random.expovariate(1 / MEAN_SERVICE_TIME))
+
+
+def arrivals(env, counter):
+    &quot;&quot;&quot;Create new students until closing time.&quot;&quot;&quot;
+    sid = 0
+    while env.now &lt; OPEN_MINUTES:
+        yield env.timeout(random.expovariate(1 / MEAN_ARRIVAL_GAP))
+        sid += 1
+        env.process(student(env, sid, counter))
+
+
+if __name__ == &quot;__main__&quot;:
+    random.seed(42)
+    env = simpy.Environment()
+    counter = simpy.Resource(env, capacity=1)  # one volunteer
+    env.process(arrivals(env, counter))
+    env.run(until=OPEN_MINUTES + 30)
+</code></pre></details></div></li><li><div class="stn">02.</div><div class="stb"><h3>Settings &amp; stats</h3><p>Config dataclass, Pantry class, students give up after 20 min.</p><p class="cpt">Dataclass · class · either-or event</p><details><summary>View stage2_config_and_stats.py</summary><pre><code>&quot;&quot;&quot;
+Stage 2 - Settings in one place + basic statistics.
+
+Changes from Stage 1:
+  * A Config dataclass holds every setting, so scenarios are easy to change.
+  * A Pantry class keeps the counter and a list of records.
+  * Students give up if they wait longer than max_wait.
+  * We report average wait and % who gave up instead of printing every event.
+
+New concepts: dataclasses, classes, lists of dicts, the `|` (either-or) event.
+&quot;&quot;&quot;
+
+import random
+import statistics
+from dataclasses import dataclass
+
+import simpy
+
+
+@dataclass
+class Config:
+    &quot;&quot;&quot;Settings for one run (minutes).&quot;&quot;&quot;
+    volunteers: int = 1
+    open_minutes: int = 180
+    mean_arrival_gap: float = 1.5
+    mean_service_time: float = 2.5
+    max_wait: float = 20.0
+    seed: int = 42
+
+
+class Pantry:
+    &quot;&quot;&quot;Counter (volunteers) plus a list of what happened to each student.&quot;&quot;&quot;
+
+    def __init__(self, env, cfg):
+        self.env = env
+        self.cfg = cfg
+        self.counter = simpy.Resource(env, capacity=cfg.volunteers)
+        self.records = []
+
+
+def student(env, sid, pantry):
+    arrived = env.now
+    with pantry.counter.request() as req:
+        result = yield req | env.timeout(pantry.cfg.max_wait)
+        waited = env.now - arrived
+        if req in result:
+            yield env.timeout(random.expovariate(1 / pantry.cfg.mean_service_time))
+            outcome = &quot;served&quot;
+        else:
+            outcome = &quot;gave_up&quot;
+    pantry.records.append({&quot;student&quot;: sid, &quot;wait&quot;: waited, &quot;outcome&quot;: outcome})
+
+
+def arrivals(env, pantry):
+    sid = 0
+    while env.now &lt; pantry.cfg.open_minutes:
+        yield env.timeout(random.expovariate(1 / pantry.cfg.mean_arrival_gap))
+        sid += 1
+        env.process(student(env, sid, pantry))
+
+
+def run(cfg):
+    random.seed(cfg.seed)
+    env = simpy.Environment()
+    pantry = Pantry(env, cfg)
+    env.process(arrivals(env, pantry))
+    env.run(until=cfg.open_minutes + cfg.max_wait + 30)
+    return pantry.records
+
+
+if __name__ == &quot;__main__&quot;:
+    for v in (1, 2, 3):
+        recs = run(Config(volunteers=v))
+        gave_up = sum(r[&quot;outcome&quot;] == &quot;gave_up&quot; for r in recs)
+        avg_wait = statistics.mean(r[&quot;wait&quot;] for r in recs)
+        print(f&quot;{v} volunteer(s): {len(recs)} students, &quot;
+              f&quot;avg wait {avg_wait:.1f} min, gave up {100*gave_up/len(recs):.1f}%&quot;)
+</code></pre></details></div></li><li><div class="stn">03.</div><div class="stb"><h3>Food stock &amp; diets</h3><p>One Container per diet: suitable, unsuitable, no food, gave up.</p><p class="cpt">Container · dict · weighted choice</p><details><summary>View stage3_food_stock.py</summary><pre><code>&quot;&quot;&quot;
+Stage 3 - Food stock and culturally appropriate food.
+
+Changes from Stage 2:
+  * Each student has a dietary need (general / vegetarian / halal).
+  * Stock is held in one simpy.Container per diet group.
+  * Outcomes are now: suitable, unsuitable (got general food instead),
+    no_food (all stock gone), gave_up.
+
+Why: research on international students in Australia (Leung et al., 2025)
+found a lack of culturally appropriate food is a key barrier. This stage
+makes that visible in the model. Diet shares are ASSUMPTIONS.
+
+New concepts: simpy.Container, dictionaries, random.choices with weights,
+sub-processes that return a value.
+&quot;&quot;&quot;
+
+import random
+from collections import Counter
+from dataclasses import dataclass, field
+
+import simpy
+
+DIET_SHARES = {&quot;general&quot;: 0.55, &quot;vegetarian&quot;: 0.25, &quot;halal&quot;: 0.20}
+
+
+@dataclass
+class Config:
+    volunteers: int = 2
+    open_minutes: int = 180
+    mean_arrival_gap: float = 1.5
+    mean_service_time: float = 2.5
+    max_wait: float = 20.0
+    stock: dict = field(default_factory=lambda: {&quot;general&quot;: 70, &quot;vegetarian&quot;: 25, &quot;halal&quot;: 15})
+    seed: int = 42
+
+
+class Pantry:
+    def __init__(self, env, cfg):
+        self.env = env
+        self.cfg = cfg
+        self.counter = simpy.Resource(env, capacity=cfg.volunteers)
+        self.stock = {d: simpy.Container(env, init=n, capacity=max(n, 1))
+                      for d, n in cfg.stock.items()}
+        self.records = []
+
+    def serve(self, diet):
+        &quot;&quot;&quot;Pack a parcel and report whether it met the student&#x27;s need.&quot;&quot;&quot;
+        yield self.env.timeout(random.expovariate(1 / self.cfg.mean_service_time))
+        if self.stock[diet].level &gt; 0:
+            yield self.stock[diet].get(1)
+            return &quot;suitable&quot;
+        if diet != &quot;general&quot; and self.stock[&quot;general&quot;].level &gt; 0:
+            yield self.stock[&quot;general&quot;].get(1)
+            return &quot;unsuitable&quot;
+        return &quot;no_food&quot;
+
+
+def student(env, sid, pantry):
+    arrived = env.now
+    diet = random.choices(list(DIET_SHARES), weights=DIET_SHARES.values())[0]
+    with pantry.counter.request() as req:
+        result = yield req | env.timeout(pantry.cfg.max_wait)
+        waited = env.now - arrived
+        outcome = (yield env.process(pantry.serve(diet))) if req in result else &quot;gave_up&quot;
+    pantry.records.append({&quot;student&quot;: sid, &quot;diet&quot;: diet, &quot;wait&quot;: waited, &quot;outcome&quot;: outcome})
+
+
+def arrivals(env, pantry):
+    sid = 0
+    while env.now &lt; pantry.cfg.open_minutes:
+        yield env.timeout(random.expovariate(1 / pantry.cfg.mean_arrival_gap))
+        sid += 1
+        env.process(student(env, sid, pantry))
+
+
+def run(cfg):
+    random.seed(cfg.seed)
+    env = simpy.Environment()
+    pantry = Pantry(env, cfg)
+    env.process(arrivals(env, pantry))
+    env.run(until=cfg.open_minutes + cfg.max_wait + 30)
+    return pantry.records
+
+
+if __name__ == &quot;__main__&quot;:
+    recs = run(Config())
+    print(&quot;Overall:&quot;, dict(Counter(r[&quot;outcome&quot;] for r in recs)))
+    for diet in DIET_SHARES:
+        print(f&quot;  {diet:&lt;11}&quot;, dict(Counter(r[&quot;outcome&quot;] for r in recs if r[&quot;diet&quot;] == diet)))
+</code></pre></details></div></li><li><div class="stn">04.</div><div class="stb"><h3>Scenario comparison</h3><p>pandas summaries, 20 repeated runs per scenario.</p><p class="cpt">DataFrame · replace() · repetition</p><details><summary>View stage4_scenarios_pandas.py</summary><pre><code>&quot;&quot;&quot;
+Stage 4 - Compare scenarios with pandas and repeated runs.
+
+Changes from Stage 3:
+  * Records go into a pandas DataFrame.
+  * summarise() turns records into percentages a coordinator understands.
+  * run_replications() repeats each scenario with different seeds and
+    averages them - one random run can be misleading.
+  * Several &quot;what if&quot; scenarios are compared side by side.
+
+New concepts: pandas DataFrames, dataclasses.replace, functions as
+building blocks, why repeated random runs matter.
+&quot;&quot;&quot;
+
+import random
+import statistics
+from dataclasses import dataclass, field, replace
+
+import pandas as pd
+import simpy
+
+DIET_SHARES = {&quot;general&quot;: 0.55, &quot;vegetarian&quot;: 0.25, &quot;halal&quot;: 0.20}
+
+
+@dataclass
+class Config:
+    name: str = &quot;Baseline&quot;
+    volunteers: int = 2
+    open_minutes: int = 180
+    mean_arrival_gap: float = 1.5
+    mean_service_time: float = 2.5
+    max_wait: float = 20.0
+    stock: dict = field(default_factory=lambda: {&quot;general&quot;: 70, &quot;vegetarian&quot;: 25, &quot;halal&quot;: 15})
+    seed: int = 42
+
+
+class Pantry:
+    def __init__(self, env, cfg):
+        self.env, self.cfg = env, cfg
+        self.counter = simpy.Resource(env, capacity=cfg.volunteers)
+        self.stock = {d: simpy.Container(env, init=n, capacity=max(n, 1))
+                      for d, n in cfg.stock.items()}
+        self.records = []
+
+    def serve(self, diet):
+        yield self.env.timeout(random.expovariate(1 / self.cfg.mean_service_time))
+        if self.stock[diet].level &gt; 0:
+            yield self.stock[diet].get(1)
+            return &quot;suitable&quot;
+        if diet != &quot;general&quot; and self.stock[&quot;general&quot;].level &gt; 0:
+            yield self.stock[&quot;general&quot;].get(1)
+            return &quot;unsuitable&quot;
+        return &quot;no_food&quot;
+
+
+def student(env, sid, pantry):
+    arrived = env.now
+    diet = random.choices(list(DIET_SHARES), weights=DIET_SHARES.values())[0]
+    with pantry.counter.request() as req:
+        result = yield req | env.timeout(pantry.cfg.max_wait)
+        waited = env.now - arrived
+        outcome = (yield env.process(pantry.serve(diet))) if req in result else &quot;gave_up&quot;
+    pantry.records.append({&quot;student&quot;: sid, &quot;diet&quot;: diet, &quot;wait&quot;: waited, &quot;outcome&quot;: outcome})
+
+
+def arrivals(env, pantry):
+    sid = 0
+    while env.now &lt; pantry.cfg.open_minutes:
+        yield env.timeout(random.expovariate(1 / pantry.cfg.mean_arrival_gap))
+        sid += 1
+        env.process(student(env, sid, pantry))
+
+
+def run(cfg):
+    random.seed(cfg.seed)
+    env = simpy.Environment()
+    pantry = Pantry(env, cfg)
+    env.process(arrivals(env, pantry))
+    env.run(until=cfg.open_minutes + cfg.max_wait + 30)
+    return pd.DataFrame(pantry.records)
+
+
+def summarise(cfg, df):
+    pct = lambda o: 100 * (df[&quot;outcome&quot;] == o).mean()
+    served = df[df[&quot;outcome&quot;] != &quot;gave_up&quot;]
+    return {&quot;scenario&quot;: cfg.name, &quot;students&quot;: len(df),
+            &quot;suitable_%&quot;: pct(&quot;suitable&quot;), &quot;unsuitable_%&quot;: pct(&quot;unsuitable&quot;),
+            &quot;no_food_%&quot;: pct(&quot;no_food&quot;), &quot;gave_up_%&quot;: pct(&quot;gave_up&quot;),
+            &quot;avg_wait_min&quot;: statistics.mean(served[&quot;wait&quot;]) if len(served) else 0}
+
+
+def run_replications(cfg, reps=20):
+    rows = [summarise(cfg, run(replace(cfg, seed=cfg.seed + i))) for i in range(reps)]
+    return {&quot;scenario&quot;: cfg.name,
+            **pd.DataFrame(rows).drop(columns=&quot;scenario&quot;).mean().round(1).to_dict()}
+
+
+if __name__ == &quot;__main__&quot;:
+    base = Config()
+    matched = {&quot;general&quot;: 60, &quot;vegetarian&quot;: 28, &quot;halal&quot;: 22}
+    scenarios = [base,
+                 replace(base, name=&quot;+1 volunteer&quot;, volunteers=3),
+                 replace(base, name=&quot;Culturally matched stock&quot;, stock=matched)]
+    print(pd.DataFrame([run_replications(s) for s in scenarios]).to_string(index=False))
+</code></pre></details></div></li><li><div class="stn">05.</div><div class="stb"><h3>CLI &amp; export</h3><p>argparse options, CSV and chart output.</p><p class="cpt">argparse · file output · matplotlib</p><details><summary>View stage5_cli_export.py</summary><pre><code>&quot;&quot;&quot;
+Stage 5 - Command-line options, CSV + chart export.
+
+A small SimPy model of a student-run campus food bank, modelled on the
+Swinburne Student Union (SSU) FoodBank, a free walk-in service open
+10am-1pm on weekdays (180 minutes, as used below).
+
+Why this matters:
+    Australian research reports food insecurity among university students,
+    and a 2025 study of international students (Leung et al., Health
+    Promotion Journal of Australia) found a lack of culturally appropriate
+    food and inefficient pantry operations were key barriers. This program
+    lets a food bank coordinator test simple choices - volunteers, stock and
+    culturally suitable stock - and see how many students get a parcel
+    that meets their needs.
+
+What it is NOT:
+    A real forecasting tool. All numbers below are illustrative assumptions
+    and should be replaced with real pantry data before drawing conclusions.
+
+Run:
+    python pantry_sim.py                 # compare built-in scenarios
+    python pantry_sim.py --volunteers 3  # run one custom scenario
+&quot;&quot;&quot;
+
+import argparse
+import random
+import statistics
+from dataclasses import dataclass, replace
+
+import pandas as pd
+import simpy
+
+# Dietary groups a student may need. Shares are ASSUMPTIONS for illustration.
+DIET_SHARES = {&quot;general&quot;: 0.55, &quot;vegetarian&quot;: 0.25, &quot;halal&quot;: 0.20}
+
+
+@dataclass
+class Config:
+    &quot;&quot;&quot;All settings for one simulation run (times are in minutes).&quot;&quot;&quot;
+
+    name: str = &quot;Baseline&quot;
+    volunteers: int = 2            # people serving at the counter
+    open_minutes: int = 180        # pantry open for 3 hours
+    mean_arrival_gap: float = 1.5  # average minutes between student arrivals
+    mean_service_time: float = 2.5  # average minutes to pack one parcel
+    max_wait: float = 20.0         # students give up after waiting this long
+    stock: dict = None             # starting parcels per diet group
+    seed: int = 42
+
+    def __post_init__(self):
+        if self.stock is None:
+            self.stock = {&quot;general&quot;: 70, &quot;vegetarian&quot;: 25, &quot;halal&quot;: 15}
+
+
+class Pantry:
+    &quot;&quot;&quot;The pantry: a counter (volunteers) plus food stock per diet group.&quot;&quot;&quot;
+
+    def __init__(self, env, cfg):
+        self.env = env
+        self.cfg = cfg
+        self.counter = simpy.Resource(env, capacity=cfg.volunteers)
+        # One SimPy Container per diet group, so each can run out separately.
+        self.stock = {
+            diet: simpy.Container(env, init=amount, capacity=max(amount, 1))
+            for diet, amount in cfg.stock.items()
+        }
+        self.records = []  # one dict per student, filled during the run
+
+    def serve(self, diet):
+        &quot;&quot;&quot;Pack a parcel. Returns the outcome as a short string.&quot;&quot;&quot;
+        yield self.env.timeout(random.expovariate(1 / self.cfg.mean_service_time))
+        if self.stock[diet].level &gt; 0:
+            yield self.stock[diet].get(1)
+            return &quot;suitable&quot;
+        if diet != &quot;general&quot; and self.stock[&quot;general&quot;].level &gt; 0:
+            # Something was given, but it may not meet their dietary need.
+            yield self.stock[&quot;general&quot;].get(1)
+            return &quot;unsuitable&quot;
+        return &quot;no_food&quot;
+
+
+def pick_diet():
+    &quot;&quot;&quot;Randomly choose a diet group using DIET_SHARES.&quot;&quot;&quot;
+    return random.choices(list(DIET_SHARES), weights=DIET_SHARES.values())[0]
+
+
+def student(env, sid, pantry):
+    &quot;&quot;&quot;One student: arrive, queue (or give up), get a parcel, leave.&quot;&quot;&quot;
+    arrived = env.now
+    diet = pick_diet()
+    with pantry.counter.request() as req:
+        # Wait for a volunteer OR run out of patience - whichever comes first.
+        result = yield req | env.timeout(pantry.cfg.max_wait)
+        waited = env.now - arrived
+        if req not in result:
+            outcome = &quot;gave_up&quot;
+        else:
+            outcome = yield env.process(pantry.serve(diet))
+    pantry.records.append(
+        {&quot;student&quot;: sid, &quot;diet&quot;: diet, &quot;wait&quot;: round(waited, 2), &quot;outcome&quot;: outcome}
+    )
+
+
+def arrivals(env, pantry):
+    &quot;&quot;&quot;Generate students until closing time.&quot;&quot;&quot;
+    sid = 0
+    while env.now &lt; pantry.cfg.open_minutes:
+        yield env.timeout(random.expovariate(1 / pantry.cfg.mean_arrival_gap))
+        sid += 1
+        env.process(student(env, sid, pantry))
+
+
+def run(cfg):
+    &quot;&quot;&quot;Run one scenario and return a DataFrame of student records.&quot;&quot;&quot;
+    random.seed(cfg.seed)
+    env = simpy.Environment()
+    pantry = Pantry(env, cfg)
+    env.process(arrivals(env, pantry))
+    # Let students already in the queue finish after the doors close.
+    env.run(until=cfg.open_minutes + cfg.max_wait + 30)
+    return pd.DataFrame(pantry.records)
+
+
+def summarise(cfg, df):
+    &quot;&quot;&quot;Turn raw records into the key numbers a coordinator cares about.&quot;&quot;&quot;
+    total = len(df)
+    share = lambda o: round(100 * (df[&quot;outcome&quot;] == o).sum() / total, 1) if total else 0.0
+    served = df[df[&quot;outcome&quot;] != &quot;gave_up&quot;]
+    return {
+        &quot;scenario&quot;: cfg.name,
+        &quot;volunteers&quot;: cfg.volunteers,
+        &quot;students&quot;: total,
+        &quot;suitable_%&quot;: share(&quot;suitable&quot;),
+        &quot;unsuitable_%&quot;: share(&quot;unsuitable&quot;),
+        &quot;no_food_%&quot;: share(&quot;no_food&quot;),
+        &quot;gave_up_%&quot;: share(&quot;gave_up&quot;),
+        &quot;avg_wait_min&quot;: round(statistics.mean(served[&quot;wait&quot;]), 1) if len(served) else 0.0,
+    }
+
+
+def run_replications(cfg, reps=20):
+    &quot;&quot;&quot;Repeat a scenario with different seeds and average the results.
+
+    One random run can be lucky or unlucky; averaging gives a fairer view.
+    &quot;&quot;&quot;
+    rows = [summarise(cfg, run(replace(cfg, seed=cfg.seed + i))) for i in range(reps)]
+    avg = pd.DataFrame(rows).drop(columns=&quot;scenario&quot;).mean().round(1).to_dict()
+    return {&quot;scenario&quot;: cfg.name, **avg}
+
+
+def default_scenarios():
+    &quot;&quot;&quot;A few &#x27;what if&#x27; settings a pantry coordinator might test.&quot;&quot;&quot;
+    base = Config()
+    return [
+        base,
+        replace(base, name=&quot;+1 volunteer&quot;, volunteers=3),
+        replace(base, name=&quot;Same stock, culturally matched&quot;,
+                stock={&quot;general&quot;: 60, &quot;vegetarian&quot;: 28, &quot;halal&quot;: 22}),
+        replace(base, name=&quot;+1 volunteer &amp; matched stock&quot;, volunteers=3,
+                stock={&quot;general&quot;: 60, &quot;vegetarian&quot;: 28, &quot;halal&quot;: 22}),
+    ]
+
+
+def plot(results, path=&quot;results.png&quot;):
+    &quot;&quot;&quot;Save a stacked bar chart of outcomes per scenario.&quot;&quot;&quot;
+    import matplotlib
+    matplotlib.use(&quot;Agg&quot;)
+    import matplotlib.pyplot as plt
+
+    cols = [&quot;suitable_%&quot;, &quot;unsuitable_%&quot;, &quot;no_food_%&quot;, &quot;gave_up_%&quot;]
+    ax = results.set_index(&quot;scenario&quot;)[cols].plot(
+        kind=&quot;barh&quot;, stacked=True, figsize=(9, 4),
+        color=[&quot;#2a9d8f&quot;, &quot;#e9c46a&quot;, &quot;#e76f51&quot;, &quot;#8d99ae&quot;])
+    ax.set_xlabel(&quot;% of students&quot;)
+    ax.set_title(&quot;Pantry outcomes by scenario (average of runs)&quot;)
+    ax.invert_yaxis()
+    plt.tight_layout()
+    plt.savefig(path, dpi=120)
+    plt.close()
+    return path
+
+
+def parse_args(argv=None):
+    &quot;&quot;&quot;Read command-line options for a custom scenario.&quot;&quot;&quot;
+    p = argparse.ArgumentParser(description=&quot;Campus food pantry simulator&quot;)
+    p.add_argument(&quot;--volunteers&quot;, type=int, help=&quot;run one custom scenario&quot;)
+    p.add_argument(&quot;--minutes&quot;, type=int, default=180, help=&quot;opening time&quot;)
+    p.add_argument(&quot;--reps&quot;, type=int, default=20, help=&quot;runs per scenario&quot;)
+    p.add_argument(&quot;--csv&quot;, default=&quot;results.csv&quot;, help=&quot;where to save results&quot;)
+    return p.parse_args(argv)
+
+
+def main(argv=None):
+    &quot;&quot;&quot;Entry point: run scenarios, print a table, save CSV and chart.&quot;&quot;&quot;
+    args = parse_args(argv)
+    if args.volunteers is not None:
+        if args.volunteers &lt; 1:
+            raise SystemExit(&quot;Need at least 1 volunteer.&quot;)
+        scenarios = [Config(name=&quot;Custom&quot;, volunteers=args.volunteers,
+                            open_minutes=args.minutes)]
+    else:
+        scenarios = [replace(s, open_minutes=args.minutes) for s in default_scenarios()]
+
+    results = pd.DataFrame([run_replications(s, args.reps) for s in scenarios])
+    print(results.to_string(index=False))
+    results.to_csv(args.csv, index=False)
+    print(f&quot;\nSaved {args.csv} and {plot(results)}&quot;)
+    print(&quot;Note: inputs are illustrative assumptions, not real pantry data.&quot;)
+    return results
+
+
+if __name__ == &quot;__main__&quot;:
+    main()
+</code></pre></details></div></li><li><div class="stn">06.</div><div class="stb"><h3>Final &amp; tested</h3><p>CSV input, validation, logging, 95% CI, 12 tests, bug fix.</p><p class="cpt">File input · exceptions · pytest</p><details><summary>View stage6_final.py</summary><pre><code>&quot;&quot;&quot;
+Campus Food Pantry Simulator (final version - Stage 6).
+
+A small SimPy model of a student-run campus food bank, modelled on the
+Swinburne Student Union (SSU) FoodBank, a free walk-in service open
+10am-1pm on weekdays (180 minutes, as used below).
+
+Why this matters:
+    Food insecurity among Australian university students rose from 42% to
+    53% between 2022 and 2024, with international students at higher risk
+    (Kent et al., 2025). A study of international students (Leung et al.,
+    2025) found a lack of culturally appropriate food and inefficient
+    pantry operations were key barriers. This program
+    lets a food bank coordinator test simple choices - volunteers, stock and
+    culturally suitable stock - and see how many students get a parcel
+    that meets their needs.
+
+What it is NOT:
+    A forecasting tool, or a voice for any community. Every number is an
+    illustrative assumption to be replaced with real, consented data.
+
+Run:
+    python pantry_sim.py                          # built-in scenarios
+    python pantry_sim.py --scenarios scenarios.csv
+    python pantry_sim.py --volunteers 3 --verbose
+&quot;&quot;&quot;
+
+import argparse
+import csv
+import logging
+import random
+import statistics
+import time
+from dataclasses import dataclass, field, replace
+
+import pandas as pd
+import simpy
+
+log = logging.getLogger(&quot;pantry&quot;)
+
+# Dietary groups and the share of students needing each (ASSUMPTIONS).
+DIET_SHARES = {&quot;general&quot;: 0.55, &quot;vegetarian&quot;: 0.25, &quot;halal&quot;: 0.20}
+OUTCOMES = (&quot;suitable&quot;, &quot;unsuitable&quot;, &quot;no_food&quot;, &quot;gave_up&quot;)
+
+
+def default_stock():
+    &quot;&quot;&quot;Starting parcels per diet group (a fresh dict for every Config).&quot;&quot;&quot;
+    return {&quot;general&quot;: 70, &quot;vegetarian&quot;: 25, &quot;halal&quot;: 15}
+
+
+@dataclass
+class Config:
+    &quot;&quot;&quot;All settings for one simulation run (times are in minutes).&quot;&quot;&quot;
+
+    name: str = &quot;Baseline&quot;
+    volunteers: int = 2             # people serving at the counter
+    open_minutes: int = 180         # SSU FoodBank 10am-1pm = 3 hours
+    mean_arrival_gap: float = 1.5   # average minutes between arrivals
+    mean_service_time: float = 2.5  # average minutes to pack one parcel
+    max_wait: float = 20.0          # students give up after this long
+    stock: dict = field(default_factory=default_stock)
+    seed: int = 42
+
+    def validate(self):
+        &quot;&quot;&quot;Raise ValueError if a setting makes no sense.&quot;&quot;&quot;
+        if self.volunteers &lt; 1:
+            raise ValueError(f&quot;{self.name}: need at least 1 volunteer&quot;)
+        if min(self.open_minutes, self.mean_arrival_gap,
+               self.mean_service_time, self.max_wait) &lt;= 0:
+            raise ValueError(f&quot;{self.name}: times must be positive&quot;)
+        if set(self.stock) != set(DIET_SHARES):
+            raise ValueError(f&quot;{self.name}: stock needs {sorted(DIET_SHARES)}&quot;)
+        if any(n &lt; 0 for n in self.stock.values()):
+            raise ValueError(f&quot;{self.name}: stock cannot be negative&quot;)
+        return self
+
+
+class Pantry:
+    &quot;&quot;&quot;The pantry: a counter (volunteers) plus food stock per diet group.&quot;&quot;&quot;
+
+    def __init__(self, env, cfg):
+        self.env = env
+        self.cfg = cfg
+        self.counter = simpy.Resource(env, capacity=cfg.volunteers)
+        # One Container per diet group, so each can run out separately.
+        self.stock = {
+            diet: simpy.Container(env, init=amount, capacity=max(amount, 1))
+            for diet, amount in cfg.stock.items()
+        }
+        self.records = []  # one dict per student
+
+    def serve(self, diet):
+        &quot;&quot;&quot;Pack a parcel and return how well it met the student&#x27;s need.&quot;&quot;&quot;
+        yield self.env.timeout(random.expovariate(1 / self.cfg.mean_service_time))
+        if self.stock[diet].level &gt; 0:
+            yield self.stock[diet].get(1)
+            return &quot;suitable&quot;
+        if diet != &quot;general&quot; and self.stock[&quot;general&quot;].level &gt; 0:
+            yield self.stock[&quot;general&quot;].get(1)  # food, but not what they need
+            return &quot;unsuitable&quot;
+        return &quot;no_food&quot;
+
+
+def pick_diet():
+    &quot;&quot;&quot;Randomly choose a diet group using DIET_SHARES as weights.&quot;&quot;&quot;
+    return random.choices(list(DIET_SHARES), weights=DIET_SHARES.values())[0]
+
+
+def student(env, sid, pantry):
+    &quot;&quot;&quot;One student: arrive, queue (or give up), get a parcel, leave.&quot;&quot;&quot;
+    arrived = env.now
+    diet = pick_diet()
+    with pantry.counter.request() as req:
+        # Wait for a volunteer OR run out of patience, whichever is first.
+        result = yield req | env.timeout(pantry.cfg.max_wait)
+        waited = env.now - arrived
+        if req in result:
+            outcome = yield env.process(pantry.serve(diet))
+        else:
+            outcome = &quot;gave_up&quot;
+    log.debug(&quot;t=%6.1f student %3d %-10s %-10s waited %.1f&quot;,
+              env.now, sid, diet, outcome, waited)
+    pantry.records.append(
+        {&quot;student&quot;: sid, &quot;diet&quot;: diet, &quot;wait&quot;: round(waited, 2), &quot;outcome&quot;: outcome})
+
+
+def arrivals(env, pantry):
+    &quot;&quot;&quot;Generate students until closing time.&quot;&quot;&quot;
+    sid = 0
+    while True:
+        yield env.timeout(random.expovariate(1 / pantry.cfg.mean_arrival_gap))
+        if env.now &gt;= pantry.cfg.open_minutes:
+            break  # doors closed - this student arrived too late
+        sid += 1
+        env.process(student(env, sid, pantry))
+
+
+def run(cfg):
+    &quot;&quot;&quot;Run one scenario and return a DataFrame of student records.&quot;&quot;&quot;
+    random.seed(cfg.seed)
+    env = simpy.Environment()
+    pantry = Pantry(env, cfg)
+    env.process(arrivals(env, pantry))
+    env.run(until=cfg.open_minutes + cfg.max_wait + 30)  # let the queue clear
+    return pd.DataFrame(pantry.records, columns=[&quot;student&quot;, &quot;diet&quot;, &quot;wait&quot;, &quot;outcome&quot;])
+
+
+def summarise(df):
+    &quot;&quot;&quot;Turn raw records into the percentages a coordinator cares about.&quot;&quot;&quot;
+    total = len(df)
+    row = {&quot;students&quot;: total}
+    for outcome in OUTCOMES:
+        row[f&quot;{outcome}_%&quot;] = 100 * (df[&quot;outcome&quot;] == outcome).sum() / total if total else 0.0
+    served = df[df[&quot;outcome&quot;] != &quot;gave_up&quot;]
+    row[&quot;avg_wait_min&quot;] = served[&quot;wait&quot;].mean() if len(served) else 0.0
+    return row
+
+
+def run_replications(cfg, reps=20):
+    &quot;&quot;&quot;Repeat a scenario with different seeds; return mean and 95% CI.
+
+    One random run can be lucky or unlucky. Averaging many runs, and
+    showing a confidence interval, tells us how much to trust a difference.
+    &quot;&quot;&quot;
+    rows = [summarise(run(replace(cfg, seed=cfg.seed + i))) for i in range(reps)]
+    table = pd.DataFrame(rows)
+    out = {&quot;scenario&quot;: cfg.name, &quot;volunteers&quot;: cfg.volunteers}
+    out.update(table.mean().round(1).to_dict())
+    suitable = table[&quot;suitable_%&quot;].tolist()
+    half_width = 1.96 * statistics.stdev(suitable) / reps ** 0.5 if reps &gt; 1 else 0.0
+    out[&quot;suitable_ci95&quot;] = round(half_width, 1)
+    return out
+
+
+def default_scenarios():
+    &quot;&quot;&quot;A few &#x27;what if&#x27; settings a pantry coordinator might test.&quot;&quot;&quot;
+    base = Config()
+    matched = {&quot;general&quot;: 60, &quot;vegetarian&quot;: 28, &quot;halal&quot;: 22}  # same 110 parcels
+    return [
+        base,
+        replace(base, name=&quot;+1 volunteer&quot;, volunteers=3),
+        replace(base, name=&quot;Culturally matched stock&quot;, stock=matched),
+        replace(base, name=&quot;+1 volunteer &amp; matched&quot;, volunteers=3, stock=matched),
+    ]
+
+
+def load_scenarios(path):
+    &quot;&quot;&quot;Read scenarios from a CSV file (one row per scenario).
+
+    Columns: name, volunteers, general, vegetarian, halal.
+    Any missing optional setting falls back to the Config default.
+    &quot;&quot;&quot;
+    scenarios = []
+    with open(path, newline=&quot;&quot;, encoding=&quot;utf-8&quot;) as f:
+        for line_no, row in enumerate(csv.DictReader(f), start=2):
+            try:
+                cfg = Config(
+                    name=row[&quot;name&quot;].strip(),
+                    volunteers=int(row[&quot;volunteers&quot;]),
+                    stock={d: int(row[d]) for d in DIET_SHARES},
+                )
+                scenarios.append(cfg.validate())
+            except (KeyError, ValueError) as err:
+                raise ValueError(f&quot;{path} line {line_no}: {err}&quot;) from err
+    if not scenarios:
+        raise ValueError(f&quot;{path} has no scenarios&quot;)
+    return scenarios
+
+
+def plot(results, path=&quot;results.png&quot;):
+    &quot;&quot;&quot;Save a stacked bar chart of outcomes per scenario.&quot;&quot;&quot;
+    import matplotlib
+    matplotlib.use(&quot;Agg&quot;)  # draw to file, no window needed
+    import matplotlib.pyplot as plt
+
+    cols = [f&quot;{o}_%&quot; for o in OUTCOMES]
+    ax = results.set_index(&quot;scenario&quot;)[cols].plot(
+        kind=&quot;barh&quot;, stacked=True, figsize=(9, 4),
+        color=[&quot;#2a9d8f&quot;, &quot;#e9c46a&quot;, &quot;#e76f51&quot;, &quot;#8d99ae&quot;])
+    ax.set_xlabel(&quot;% of students&quot;)
+    ax.set_title(&quot;FoodBank outcomes by scenario (average of runs)&quot;)
+    ax.invert_yaxis()
+    plt.tight_layout()
+    plt.savefig(path, dpi=120)
+    plt.close()
+    return path
+
+
+def parse_args(argv=None):
+    &quot;&quot;&quot;Read command-line options.&quot;&quot;&quot;
+    p = argparse.ArgumentParser(description=&quot;Campus food pantry simulator&quot;)
+    p.add_argument(&quot;--scenarios&quot;, help=&quot;CSV file of scenarios to compare&quot;)
+    p.add_argument(&quot;--volunteers&quot;, type=int, help=&quot;run one custom scenario&quot;)
+    p.add_argument(&quot;--minutes&quot;, type=int, default=180, help=&quot;opening time&quot;)
+    p.add_argument(&quot;--reps&quot;, type=int, default=20, help=&quot;runs per scenario&quot;)
+    p.add_argument(&quot;--csv&quot;, default=&quot;results.csv&quot;, help=&quot;output CSV path&quot;)
+    p.add_argument(&quot;--verbose&quot;, action=&quot;store_true&quot;, help=&quot;log every student&quot;)
+    return p.parse_args(argv)
+
+
+def main(argv=None):
+    &quot;&quot;&quot;Entry point: pick scenarios, run them, print, save CSV and chart.&quot;&quot;&quot;
+    args = parse_args(argv)
+    logging.basicConfig(level=logging.WARNING, format=&quot;%(message)s&quot;)
+    log.setLevel(logging.DEBUG if args.verbose else logging.WARNING)  # ours only
+    try:
+        if args.scenarios:
+            scenarios = load_scenarios(args.scenarios)
+        elif args.volunteers is not None:
+            scenarios = [Config(name=&quot;Custom&quot;, volunteers=args.volunteers)]
+        else:
+            scenarios = default_scenarios()
+        scenarios = [replace(s, open_minutes=args.minutes).validate() for s in scenarios]
+    except (OSError, ValueError) as err:
+        raise SystemExit(f&quot;Input error: {err}&quot;)
+
+    start = time.perf_counter()
+    results = pd.DataFrame([run_replications(s, args.reps) for s in scenarios])
+    elapsed = time.perf_counter() - start
+
+    print(results.to_string(index=False))
+    results.to_csv(args.csv, index=False)
+    print(f&quot;\nSaved {args.csv} and {plot(results)}&quot;)
+    print(f&quot;{len(scenarios) * args.reps} runs in {elapsed:.2f}s&quot;)
+    print(&quot;Note: inputs are illustrative assumptions, not real pantry data.&quot;)
+    return results
+
+
+if __name__ == &quot;__main__&quot;:
+    main()
+</code></pre></details></div></li><li><div class="stn">07.</div><div class="stb"><h3>Refactor</h3><p>Pure decision rule, own random generator, no pandas, 19 tests, ~2× faster.</p><p class="cpt">Pure functions · closures · Counter</p><details><summary>View stage7_refactor.py</summary><pre><code>&quot;&quot;&quot;
+Campus Food Pantry Simulator (Stage 7 - refactored for efficiency and reuse).
+
+A small SimPy model of a student-run campus food bank, modelled on the
+Swinburne Student Union (SSU) FoodBank, a free walk-in service open
+10am-1pm on weekdays (180 minutes, as used below).
+
+Why this matters:
+    Food insecurity among Australian university students rose from 42% to
+    53% between 2022 and 2024, with international students at higher risk
+    (Kent et al., 2025). A study of international students (Leung et al.,
+    2025) found a lack of culturally appropriate food and inefficient
+    pantry operations were key barriers. This program lets a food bank
+    coordinator test simple choices - volunteers, stock and culturally
+    suitable stock - and see how many students get a parcel that meets
+    their needs.
+
+Not a forecasting tool or a voice for any community: every number is an
+illustrative assumption to be replaced with real, consented data.
+
+Reuse: import Config, choose_parcel, run, summarise, compare or
+load_scenarios on their own.
+
+Run:
+    python pantry_sim.py                          # built-in scenarios
+    python pantry_sim.py --scenarios scenarios.csv
+    python pantry_sim.py --volunteers 3 --verbose
+&quot;&quot;&quot;
+
+import argparse
+import csv
+import logging
+import random
+import statistics
+import time
+from collections import Counter
+from dataclasses import dataclass, field, fields, replace
+
+import simpy
+
+log = logging.getLogger(&quot;pantry&quot;)
+
+# Dietary groups and the share of students needing each (ASSUMPTIONS).
+DIET_SHARES = {&quot;general&quot;: 0.55, &quot;vegetarian&quot;: 0.25, &quot;halal&quot;: 0.20}
+DIETS = tuple(DIET_SHARES)
+WEIGHTS = tuple(DIET_SHARES.values())
+OUTCOMES = (&quot;suitable&quot;, &quot;unsuitable&quot;, &quot;no_food&quot;, &quot;gave_up&quot;)
+
+
+@dataclass(frozen=True)
+class Record:
+    &quot;&quot;&quot;What happened to one student.&quot;&quot;&quot;
+
+    diet: str
+    wait: float
+    outcome: str
+
+
+@dataclass
+class Config:
+    &quot;&quot;&quot;All settings for one simulation run (times are in minutes).&quot;&quot;&quot;
+
+    name: str = &quot;Baseline&quot;
+    volunteers: int = 2             # people serving at the counter
+    open_minutes: float = 180       # SSU FoodBank 10am-1pm = 3 hours
+    mean_arrival_gap: float = 1.5   # average minutes between arrivals
+    mean_service_time: float = 2.5  # average minutes to pack one parcel
+    max_wait: float = 20.0          # students give up after this long
+    stock: dict = field(default_factory=lambda: {&quot;general&quot;: 70, &quot;vegetarian&quot;: 25, &quot;halal&quot;: 15})
+    seed: int = 42
+
+    def validate(self):
+        &quot;&quot;&quot;Raise ValueError if a setting makes no sense; return self.&quot;&quot;&quot;
+        if self.volunteers &lt; 1:
+            raise ValueError(f&quot;{self.name}: need at least 1 volunteer&quot;)
+        if min(self.open_minutes, self.mean_arrival_gap,
+               self.mean_service_time, self.max_wait) &lt;= 0:
+            raise ValueError(f&quot;{self.name}: times must be positive&quot;)
+        if set(self.stock) != set(DIETS):
+            raise ValueError(f&quot;{self.name}: stock needs {sorted(DIETS)}&quot;)
+        if any(n &lt; 0 for n in self.stock.values()):
+            raise ValueError(f&quot;{self.name}: stock cannot be negative&quot;)
+        return self
+
+
+def choose_parcel(stock, diet):
+    &quot;&quot;&quot;Decide which stock to use for a student. Pure function, no SimPy.
+
+    Returns (outcome, diet_to_take_from) - the second is None if nothing
+    can be given. Kept separate so the rule is easy to test and change.
+    &quot;&quot;&quot;
+    if stock[diet] &gt; 0:
+        return &quot;suitable&quot;, diet
+    if diet != &quot;general&quot; and stock[&quot;general&quot;] &gt; 0:
+        return &quot;unsuitable&quot;, &quot;general&quot;   # food, but not what they need
+    return &quot;no_food&quot;, None
+
+
+def run(cfg):
+    &quot;&quot;&quot;Run one simulation and return a list of Record objects.&quot;&quot;&quot;
+    rng = random.Random(cfg.seed)        # own generator: no global state
+    env = simpy.Environment()
+    counter = simpy.Resource(env, capacity=cfg.volunteers)
+    stock = dict(cfg.stock)              # copy so cfg is never changed
+    records = []
+
+    def student(diet):
+        &quot;&quot;&quot;One student: arrive, queue (or give up), get a parcel, leave.&quot;&quot;&quot;
+        arrived = env.now
+        with counter.request() as req:
+            # Wait for a volunteer OR run out of patience, whichever is first.
+            result = yield req | env.timeout(cfg.max_wait)
+            waited = env.now - arrived
+            if req in result:
+                yield env.timeout(rng.expovariate(1 / cfg.mean_service_time))
+                outcome, take = choose_parcel(stock, diet)
+                if take:
+                    stock[take] -= 1
+            else:
+                outcome = &quot;gave_up&quot;
+        log.debug(&quot;t=%6.1f %-10s %-10s waited %.1f&quot;, env.now, diet, outcome, waited)
+        records.append(Record(diet, waited, outcome))
+
+    def arrivals():
+        &quot;&quot;&quot;Create students until closing time.&quot;&quot;&quot;
+        while True:
+            yield env.timeout(rng.expovariate(1 / cfg.mean_arrival_gap))
+            if env.now &gt;= cfg.open_minutes:
+                return                    # doors closed
+            diet = rng.choices(DIETS, weights=WEIGHTS)[0]
+            env.process(student(diet))
+
+    env.process(arrivals())
+    env.run()                             # stops by itself once the queue clears
+    return records
+
+
+def summarise(records):
+    &quot;&quot;&quot;Turn records into the percentages a coordinator cares about.&quot;&quot;&quot;
+    total = len(records)
+    counts = Counter(r.outcome for r in records)
+    row = {&quot;students&quot;: total}
+    for outcome in OUTCOMES:
+        row[f&quot;{outcome}_%&quot;] = 100 * counts[outcome] / total if total else 0.0
+    waits = [r.wait for r in records if r.outcome != &quot;gave_up&quot;]
+    row[&quot;avg_wait_min&quot;] = statistics.fmean(waits) if waits else 0.0
+    return row
+
+
+def run_replications(cfg, reps=20):
+    &quot;&quot;&quot;Repeat a scenario with seeds seed, seed+1, ... and average the results.
+
+    Returns the mean of each measure plus a 95% confidence interval on
+    suitable %, so we can judge whether a difference is real or noise.
+    &quot;&quot;&quot;
+    rows = [summarise(run(replace(cfg, seed=cfg.seed + i))) for i in range(reps)]
+    out = {&quot;scenario&quot;: cfg.name, &quot;volunteers&quot;: cfg.volunteers}
+    for key in rows[0]:
+        out[key] = round(statistics.fmean(r[key] for r in rows), 1)
+    suitable = [r[&quot;suitable_%&quot;] for r in rows]
+    spread = statistics.stdev(suitable) if reps &gt; 1 else 0.0
+    out[&quot;suitable_ci95&quot;] = round(1.96 * spread / reps ** 0.5, 1)
+    return out
+
+
+def compare(scenarios, reps=20):
+    &quot;&quot;&quot;Run several scenarios and return one result dict per scenario.&quot;&quot;&quot;
+    return [run_replications(cfg, reps) for cfg in scenarios]
+
+
+MATCHED_STOCK = {&quot;general&quot;: 60, &quot;vegetarian&quot;: 28, &quot;halal&quot;: 22}  # same 110 parcels
+
+
+def default_scenarios():
+    &quot;&quot;&quot;A few &#x27;what if&#x27; settings a coordinator might test.&quot;&quot;&quot;
+    base = Config()
+    changes = [
+        {},
+        {&quot;name&quot;: &quot;+1 volunteer&quot;, &quot;volunteers&quot;: 3},
+        {&quot;name&quot;: &quot;Culturally matched stock&quot;, &quot;stock&quot;: MATCHED_STOCK},
+        {&quot;name&quot;: &quot;+1 volunteer &amp; matched&quot;, &quot;volunteers&quot;: 3, &quot;stock&quot;: MATCHED_STOCK},
+    ]
+    return [replace(base, **change) for change in changes]
+
+
+def load_scenarios(path):
+    &quot;&quot;&quot;Read scenarios from a CSV file (one row per scenario).
+
+    Required columns: name, general, vegetarian, halal.
+    Any other Config field (e.g. volunteers, max_wait) may be added as a
+    column; missing ones use the Config default.
+    &quot;&quot;&quot;
+    types = {f.name: f.type for f in fields(Config) if f.name not in (&quot;name&quot;, &quot;stock&quot;)}
+    convert = {&quot;int&quot;: int, &quot;float&quot;: float, int: int, float: float}
+    scenarios = []
+    with open(path, newline=&quot;&quot;, encoding=&quot;utf-8&quot;) as f:
+        for line_no, row in enumerate(csv.DictReader(f), start=2):
+            try:
+                settings = {k: convert[types[k]](v) for k, v in row.items()
+                            if k in types and v not in (&quot;&quot;, None)}
+                stock = {d: int(row[d]) for d in DIETS}
+                cfg = Config(name=row[&quot;name&quot;].strip(), stock=stock, **settings)
+                scenarios.append(cfg.validate())
+            except (KeyError, ValueError, TypeError) as err:
+                raise ValueError(f&quot;{path} line {line_no}: {err}&quot;) from err
+    if not scenarios:
+        raise ValueError(f&quot;{path} has no scenarios&quot;)
+    return scenarios
+
+
+def save_csv(results, path):
+    &quot;&quot;&quot;Write a list of result dicts to a CSV file.&quot;&quot;&quot;
+    with open(path, &quot;w&quot;, newline=&quot;&quot;, encoding=&quot;utf-8&quot;) as f:
+        writer = csv.DictWriter(f, fieldnames=list(results[0]))
+        writer.writeheader()
+        writer.writerows(results)
+    return path
+
+
+def print_table(results):
+    &quot;&quot;&quot;Print result dicts as an aligned text table.&quot;&quot;&quot;
+    cols = list(results[0])
+    widths = {c: max(len(c), *(len(str(r[c])) for r in results)) for c in cols}
+    print(&quot;  &quot;.join(c.rjust(widths[c]) for c in cols))
+    for r in results:
+        print(&quot;  &quot;.join(str(r[c]).rjust(widths[c]) for c in cols))
+
+
+def plot(results, path=&quot;results.png&quot;):
+    &quot;&quot;&quot;Save a stacked bar chart of outcomes per scenario.&quot;&quot;&quot;
+    import matplotlib
+    matplotlib.use(&quot;Agg&quot;)                # draw to file, no window needed
+    import matplotlib.pyplot as plt
+
+    names = [r[&quot;scenario&quot;] for r in results]
+    colours = [&quot;#2a9d8f&quot;, &quot;#e9c46a&quot;, &quot;#e76f51&quot;, &quot;#8d99ae&quot;]
+    fig, ax = plt.subplots(figsize=(9, 4))
+    left = [0.0] * len(results)
+    for outcome, colour in zip(OUTCOMES, colours):
+        values = [r[f&quot;{outcome}_%&quot;] for r in results]
+        ax.barh(names, values, left=left, color=colour, label=outcome)
+        left = [a + b for a, b in zip(left, values)]
+    ax.set_xlabel(&quot;% of students&quot;)
+    ax.set_title(&quot;FoodBank outcomes by scenario (average of runs)&quot;)
+    ax.invert_yaxis()
+    ax.legend(loc=&quot;lower right&quot;, fontsize=8)
+    fig.tight_layout()
+    fig.savefig(path, dpi=120)
+    plt.close(fig)
+    return path
+
+
+def parse_args(argv=None):
+    &quot;&quot;&quot;Read command-line options.&quot;&quot;&quot;
+    p = argparse.ArgumentParser(description=&quot;Campus food pantry simulator&quot;)
+    p.add_argument(&quot;--scenarios&quot;, help=&quot;CSV file of scenarios to compare&quot;)
+    p.add_argument(&quot;--volunteers&quot;, type=int, help=&quot;run one custom scenario&quot;)
+    p.add_argument(&quot;--minutes&quot;, type=float, default=180, help=&quot;opening time&quot;)
+    p.add_argument(&quot;--reps&quot;, type=int, default=20, help=&quot;runs per scenario&quot;)
+    p.add_argument(&quot;--csv&quot;, default=&quot;results.csv&quot;, help=&quot;output CSV path&quot;)
+    p.add_argument(&quot;--verbose&quot;, action=&quot;store_true&quot;, help=&quot;log every student&quot;)
+    return p.parse_args(argv)
+
+
+def pick_scenarios(args):
+    &quot;&quot;&quot;Choose scenarios from the command-line options.&quot;&quot;&quot;
+    if args.scenarios:
+        scenarios = load_scenarios(args.scenarios)
+    elif args.volunteers is not None:
+        scenarios = [Config(name=&quot;Custom&quot;, volunteers=args.volunteers)]
+    else:
+        scenarios = default_scenarios()
+    return [replace(s, open_minutes=args.minutes).validate() for s in scenarios]
+
+
+def main(argv=None):
+    &quot;&quot;&quot;Entry point: pick scenarios, run them, print, save CSV and chart.&quot;&quot;&quot;
+    args = parse_args(argv)
+    logging.basicConfig(level=logging.WARNING, format=&quot;%(message)s&quot;)
+    log.setLevel(logging.DEBUG if args.verbose else logging.WARNING)
+    try:
+        scenarios = pick_scenarios(args)
+    except (OSError, ValueError) as err:
+        raise SystemExit(f&quot;Input error: {err}&quot;)
+
+    start = time.perf_counter()
+    results = compare(scenarios, args.reps)
+    elapsed = time.perf_counter() - start
+
+    print_table(results)
+    print(f&quot;\nSaved {save_csv(results, args.csv)} and {plot(results)}&quot;)
+    print(f&quot;{len(scenarios) * args.reps} runs in {elapsed:.2f}s&quot;)
+    print(&quot;Note: inputs are illustrative assumptions, not real pantry data.&quot;)
+    return results
+
+
+if __name__ == &quot;__main__&quot;:
+    main()
+</code></pre></details></div></li><li><div class="stn">08.</div><div class="stb"><h3>Simplified</h3><p>178 lines, SimPy only, scenarios from CSV, 16 tests. Same results.</p><p class="cpt">Clarity · file input · tuples</p><details><summary>View stage8_simplified.py</summary><pre><code>&quot;&quot;&quot;
+Campus FoodBank Simulator (Stage 8 - simplified).
+
+A SimPy model of a free, walk-in campus food bank, based on the
+Swinburne Student Union FoodBank (open 10am-1pm on weekdays).
+
+Why: food insecurity among Australian university students rose from 42%
+to 53% between 2022 and 2024, with international students at higher risk
+(Kent et al., 2025), and students report a lack of culturally appropriate
+food at campus pantries (Leung et al., 2025). The model asks: how many
+students leave with food that suits their diet, not just any food?
+
+All operating numbers are illustrative assumptions, not real data.
+
+Run:   python pantry_sim.py                    (reads scenarios.csv)
+       python pantry_sim.py my.csv --reps 50
+&quot;&quot;&quot;
+
+import argparse
+import csv
+import random
+import statistics
+from collections import Counter
+from dataclasses import dataclass, field, replace
+
+import simpy
+
+# Share of students needing each diet (ASSUMPTION).
+DIET_SHARES = {&quot;general&quot;: 0.55, &quot;vegetarian&quot;: 0.25, &quot;halal&quot;: 0.20}
+OUTCOMES = (&quot;suitable&quot;, &quot;unsuitable&quot;, &quot;no_food&quot;, &quot;gave_up&quot;)
+
+
+@dataclass
+class Config:
+    &quot;&quot;&quot;Settings for one scenario. Times are in minutes.&quot;&quot;&quot;
+
+    name: str = &quot;Baseline&quot;
+    volunteers: int = 2
+    stock: dict = field(default_factory=lambda: {&quot;general&quot;: 70, &quot;vegetarian&quot;: 25, &quot;halal&quot;: 15})
+    open_minutes: float = 180       # 10am-1pm
+    arrival_gap: float = 1.5        # average minutes between students
+    service_time: float = 2.5       # average minutes to pack a parcel
+    max_wait: float = 20            # students give up after this long
+    seed: int = 42
+
+    def validate(self):
+        &quot;&quot;&quot;Raise ValueError if a setting makes no sense; return self.&quot;&quot;&quot;
+        if self.volunteers &lt; 1:
+            raise ValueError(f&quot;{self.name}: need at least 1 volunteer&quot;)
+        if set(self.stock) != set(DIET_SHARES):
+            raise ValueError(f&quot;{self.name}: stock needs {list(DIET_SHARES)}&quot;)
+        if min(self.stock.values()) &lt; 0:
+            raise ValueError(f&quot;{self.name}: stock cannot be negative&quot;)
+        return self
+
+
+def choose_parcel(stock, diet):
+    &quot;&quot;&quot;Return (outcome, diet to take stock from, or None).
+
+    The core rule, kept free of SimPy so it is easy to test and change.
+    &quot;&quot;&quot;
+    if stock[diet] &gt; 0:
+        return &quot;suitable&quot;, diet
+    if diet != &quot;general&quot; and stock[&quot;general&quot;] &gt; 0:
+        return &quot;unsuitable&quot;, &quot;general&quot;      # food, but not what they need
+    return &quot;no_food&quot;, None
+
+
+def run(cfg):
+    &quot;&quot;&quot;Simulate one session. Return a list of (diet, wait, outcome).&quot;&quot;&quot;
+    rng = random.Random(cfg.seed)
+    env = simpy.Environment()
+    volunteers = simpy.Resource(env, capacity=cfg.volunteers)
+    stock = dict(cfg.stock)                 # copy, so cfg is not changed
+    records = []
+
+    def student(diet):
+        arrived = env.now
+        with volunteers.request() as turn:
+            # Wait for a volunteer OR give up - whichever happens first.
+            result = yield turn | env.timeout(cfg.max_wait)
+            wait = env.now - arrived
+            if turn not in result:
+                outcome = &quot;gave_up&quot;
+            else:
+                yield env.timeout(rng.expovariate(1 / cfg.service_time))
+                outcome, take = choose_parcel(stock, diet)
+                if take:
+                    stock[take] -= 1
+        records.append((diet, wait, outcome))
+
+    def arrivals():
+        while True:
+            yield env.timeout(rng.expovariate(1 / cfg.arrival_gap))
+            if env.now &gt;= cfg.open_minutes:
+                return                      # doors closed
+            diet = rng.choices(list(DIET_SHARES), weights=DIET_SHARES.values())[0]
+            env.process(student(diet))
+
+    env.process(arrivals())
+    env.run()                               # ends when the last student leaves
+    return records
+
+
+def summarise(records):
+    &quot;&quot;&quot;Percentage of students per outcome, plus average wait of those served.&quot;&quot;&quot;
+    total = len(records) or 1
+    counts = Counter(outcome for _, _, outcome in records)
+    row = {f&quot;{o}_%&quot;: 100 * counts[o] / total for o in OUTCOMES}
+    waits = [w for _, w, o in records if o != &quot;gave_up&quot;]
+    row[&quot;wait_min&quot;] = statistics.fmean(waits) if waits else 0.0
+    return row
+
+
+def replicate(cfg, reps=20):
+    &quot;&quot;&quot;Run a scenario `reps` times (seeds seed, seed+1, ...) and average.
+
+    Also returns a 95% confidence interval for suitable %, so we can tell
+    a real difference from random noise.
+    &quot;&quot;&quot;
+    rows = [summarise(run(replace(cfg, seed=cfg.seed + i))) for i in range(reps)]
+    result = {&quot;scenario&quot;: cfg.name, &quot;volunteers&quot;: cfg.volunteers}
+    for key in rows[0]:
+        result[key] = round(statistics.fmean(r[key] for r in rows), 1)
+    suitable = [r[&quot;suitable_%&quot;] for r in rows]
+    result[&quot;ci95&quot;] = round(1.96 * statistics.stdev(suitable) / reps ** 0.5, 1) if reps &gt; 1 else 0.0
+    return result
+
+
+def load_scenarios(path):
+    &quot;&quot;&quot;Read scenarios from CSV: name, volunteers, general, vegetarian, halal.&quot;&quot;&quot;
+    scenarios = []
+    with open(path, newline=&quot;&quot;, encoding=&quot;utf-8&quot;) as f:
+        for line, row in enumerate(csv.DictReader(f), start=2):
+            try:
+                stock = {diet: int(row[diet]) for diet in DIET_SHARES}
+                cfg = Config(row[&quot;name&quot;], int(row[&quot;volunteers&quot;]), stock)
+                scenarios.append(cfg.validate())
+            except (KeyError, ValueError, TypeError) as err:
+                raise ValueError(f&quot;{path} line {line}: {err}&quot;) from err
+    if not scenarios:
+        raise ValueError(f&quot;{path} has no scenarios&quot;)
+    return scenarios
+
+
+def save_results(results, path):
+    &quot;&quot;&quot;Write result rows to a CSV file.&quot;&quot;&quot;
+    with open(path, &quot;w&quot;, newline=&quot;&quot;, encoding=&quot;utf-8&quot;) as f:
+        writer = csv.DictWriter(f, fieldnames=results[0].keys())
+        writer.writeheader()
+        writer.writerows(results)
+
+
+def main(argv=None):
+    &quot;&quot;&quot;Read scenarios, run each one, print a table and save a CSV.&quot;&quot;&quot;
+    parser = argparse.ArgumentParser(description=&quot;Campus FoodBank simulator&quot;)
+    parser.add_argument(&quot;scenarios&quot;, nargs=&quot;?&quot;, default=&quot;scenarios.csv&quot;)
+    parser.add_argument(&quot;--reps&quot;, type=int, default=20, help=&quot;runs per scenario&quot;)
+    parser.add_argument(&quot;--out&quot;, default=&quot;results.csv&quot;, help=&quot;output CSV&quot;)
+    args = parser.parse_args(argv)
+
+    try:
+        scenarios = load_scenarios(args.scenarios)
+    except (OSError, ValueError) as err:
+        raise SystemExit(f&quot;Input error: {err}&quot;)
+
+    results = [replicate(cfg, args.reps) for cfg in scenarios]
+    print(f&quot;{&#x27;Scenario&#x27;:&lt;26}{&#x27;Suitable %&#x27;:&gt;14}{&#x27;Unsuitable %&#x27;:&gt;14}{&#x27;No food %&#x27;:&gt;11}{&#x27;Wait min&#x27;:&gt;10}&quot;)
+    for r in results:
+        suitable = f&quot;{r[&#x27;suitable_%&#x27;]} ±{r[&#x27;ci95&#x27;]}&quot;
+        print(f&quot;{r[&#x27;scenario&#x27;]:&lt;26}{suitable:&gt;14}{r[&#x27;unsuitable_%&#x27;]:&gt;14}{r[&#x27;no_food_%&#x27;]:&gt;11}{r[&#x27;wait_min&#x27;]:&gt;10}&quot;)
+    save_results(results, args.out)
+    print(f&quot;\nSaved {args.out}. Inputs are illustrative assumptions, not real data.&quot;)
+    return results
+
+
+if __name__ == &quot;__main__&quot;:
+    main()
+</code></pre></details></div></li></ol>
+ <details><summary>View the final program (pantry_sim.py)</summary><pre><code>&quot;&quot;&quot;
+Campus FoodBank Simulator (final version - Stage 8, simplified).
+
+A SimPy model of a free, walk-in campus food bank, based on the
+Swinburne Student Union FoodBank (open 10am-1pm on weekdays).
+
+Why: food insecurity among Australian university students rose from 42%
+to 53% between 2022 and 2024, with international students at higher risk
+(Kent et al., 2025), and students report a lack of culturally appropriate
+food at campus pantries (Leung et al., 2025). The model asks: how many
+students leave with food that suits their diet, not just any food?
+
+All operating numbers are illustrative assumptions, not real data.
+
+Run:   python pantry_sim.py                    (reads scenarios.csv)
+       python pantry_sim.py my.csv --reps 50
+&quot;&quot;&quot;
+
+import argparse
+import csv
+import random
+import statistics
+from collections import Counter
+from dataclasses import dataclass, field, replace
+
+import simpy
+
+# Share of students needing each diet (ASSUMPTION).
+DIET_SHARES = {&quot;general&quot;: 0.55, &quot;vegetarian&quot;: 0.25, &quot;halal&quot;: 0.20}
+OUTCOMES = (&quot;suitable&quot;, &quot;unsuitable&quot;, &quot;no_food&quot;, &quot;gave_up&quot;)
+
+
+@dataclass
+class Config:
+    &quot;&quot;&quot;Settings for one scenario. Times are in minutes.&quot;&quot;&quot;
+
+    name: str = &quot;Baseline&quot;
+    volunteers: int = 2
+    stock: dict = field(default_factory=lambda: {&quot;general&quot;: 70, &quot;vegetarian&quot;: 25, &quot;halal&quot;: 15})
+    open_minutes: float = 180       # 10am-1pm
+    arrival_gap: float = 1.5        # average minutes between students
+    service_time: float = 2.5       # average minutes to pack a parcel
+    max_wait: float = 20            # students give up after this long
+    seed: int = 42
+
+    def validate(self):
+        &quot;&quot;&quot;Raise ValueError if a setting makes no sense; return self.&quot;&quot;&quot;
+        if self.volunteers &lt; 1:
+            raise ValueError(f&quot;{self.name}: need at least 1 volunteer&quot;)
+        if set(self.stock) != set(DIET_SHARES):
+            raise ValueError(f&quot;{self.name}: stock needs {list(DIET_SHARES)}&quot;)
+        if min(self.stock.values()) &lt; 0:
+            raise ValueError(f&quot;{self.name}: stock cannot be negative&quot;)
+        return self
+
+
+def choose_parcel(stock, diet):
+    &quot;&quot;&quot;Return (outcome, diet to take stock from, or None).
+
+    The core rule, kept free of SimPy so it is easy to test and change.
+    &quot;&quot;&quot;
+    if stock[diet] &gt; 0:
+        return &quot;suitable&quot;, diet
+    if diet != &quot;general&quot; and stock[&quot;general&quot;] &gt; 0:
+        return &quot;unsuitable&quot;, &quot;general&quot;      # food, but not what they need
+    return &quot;no_food&quot;, None
+
+
+def run(cfg):
+    &quot;&quot;&quot;Simulate one session. Return a list of (diet, wait, outcome).&quot;&quot;&quot;
+    rng = random.Random(cfg.seed)
+    env = simpy.Environment()
+    volunteers = simpy.Resource(env, capacity=cfg.volunteers)
+    stock = dict(cfg.stock)                 # copy, so cfg is not changed
+    records = []
+
+    def student(diet):
+        arrived = env.now
+        with volunteers.request() as turn:
+            # Wait for a volunteer OR give up - whichever happens first.
+            result = yield turn | env.timeout(cfg.max_wait)
+            wait = env.now - arrived
+            if turn not in result:
+                outcome = &quot;gave_up&quot;
+            else:
+                yield env.timeout(rng.expovariate(1 / cfg.service_time))
+                outcome, take = choose_parcel(stock, diet)
+                if take:
+                    stock[take] -= 1
+        records.append((diet, wait, outcome))
+
+    def arrivals():
+        while True:
+            yield env.timeout(rng.expovariate(1 / cfg.arrival_gap))
+            if env.now &gt;= cfg.open_minutes:
+                return                      # doors closed
+            diet = rng.choices(list(DIET_SHARES), weights=DIET_SHARES.values())[0]
+            env.process(student(diet))
+
+    env.process(arrivals())
+    env.run()                               # ends when the last student leaves
+    return records
+
+
+def summarise(records):
+    &quot;&quot;&quot;Percentage of students per outcome, plus average wait of those served.&quot;&quot;&quot;
+    total = len(records) or 1
+    counts = Counter(outcome for _, _, outcome in records)
+    row = {f&quot;{o}_%&quot;: 100 * counts[o] / total for o in OUTCOMES}
+    waits = [w for _, w, o in records if o != &quot;gave_up&quot;]
+    row[&quot;wait_min&quot;] = statistics.fmean(waits) if waits else 0.0
+    return row
+
+
+def replicate(cfg, reps=20):
+    &quot;&quot;&quot;Run a scenario `reps` times (seeds seed, seed+1, ...) and average.
+
+    Also returns a 95% confidence interval for suitable %, so we can tell
+    a real difference from random noise.
+    &quot;&quot;&quot;
+    rows = [summarise(run(replace(cfg, seed=cfg.seed + i))) for i in range(reps)]
+    result = {&quot;scenario&quot;: cfg.name, &quot;volunteers&quot;: cfg.volunteers}
+    for key in rows[0]:
+        result[key] = round(statistics.fmean(r[key] for r in rows), 1)
+    suitable = [r[&quot;suitable_%&quot;] for r in rows]
+    result[&quot;ci95&quot;] = round(1.96 * statistics.stdev(suitable) / reps ** 0.5, 1) if reps &gt; 1 else 0.0
+    return result
+
+
+def load_scenarios(path):
+    &quot;&quot;&quot;Read scenarios from CSV: name, volunteers, general, vegetarian, halal.&quot;&quot;&quot;
+    scenarios = []
+    with open(path, newline=&quot;&quot;, encoding=&quot;utf-8&quot;) as f:
+        for line, row in enumerate(csv.DictReader(f), start=2):
+            try:
+                stock = {diet: int(row[diet]) for diet in DIET_SHARES}
+                cfg = Config(row[&quot;name&quot;], int(row[&quot;volunteers&quot;]), stock)
+                scenarios.append(cfg.validate())
+            except (KeyError, ValueError, TypeError) as err:
+                raise ValueError(f&quot;{path} line {line}: {err}&quot;) from err
+    if not scenarios:
+        raise ValueError(f&quot;{path} has no scenarios&quot;)
+    return scenarios
+
+
+def save_results(results, path):
+    &quot;&quot;&quot;Write result rows to a CSV file.&quot;&quot;&quot;
+    with open(path, &quot;w&quot;, newline=&quot;&quot;, encoding=&quot;utf-8&quot;) as f:
+        writer = csv.DictWriter(f, fieldnames=results[0].keys())
+        writer.writeheader()
+        writer.writerows(results)
+
+
+def main(argv=None):
+    &quot;&quot;&quot;Read scenarios, run each one, print a table and save a CSV.&quot;&quot;&quot;
+    parser = argparse.ArgumentParser(description=&quot;Campus FoodBank simulator&quot;)
+    parser.add_argument(&quot;scenarios&quot;, nargs=&quot;?&quot;, default=&quot;scenarios.csv&quot;)
+    parser.add_argument(&quot;--reps&quot;, type=int, default=20, help=&quot;runs per scenario&quot;)
+    parser.add_argument(&quot;--out&quot;, default=&quot;results.csv&quot;, help=&quot;output CSV&quot;)
+    args = parser.parse_args(argv)
+
+    try:
+        scenarios = load_scenarios(args.scenarios)
+    except (OSError, ValueError) as err:
+        raise SystemExit(f&quot;Input error: {err}&quot;)
+
+    results = [replicate(cfg, args.reps) for cfg in scenarios]
+    print(f&quot;{&#x27;Scenario&#x27;:&lt;26}{&#x27;Suitable %&#x27;:&gt;14}{&#x27;Unsuitable %&#x27;:&gt;14}{&#x27;No food %&#x27;:&gt;11}{&#x27;Wait min&#x27;:&gt;10}&quot;)
+    for r in results:
+        suitable = f&quot;{r[&#x27;suitable_%&#x27;]} ±{r[&#x27;ci95&#x27;]}&quot;
+        print(f&quot;{r[&#x27;scenario&#x27;]:&lt;26}{suitable:&gt;14}{r[&#x27;unsuitable_%&#x27;]:&gt;14}{r[&#x27;no_food_%&#x27;]:&gt;11}{r[&#x27;wait_min&#x27;]:&gt;10}&quot;)
+    save_results(results, args.out)
+    print(f&quot;\nSaved {args.out}. Inputs are illustrative assumptions, not real data.&quot;)
+    return results
+
+
+if __name__ == &quot;__main__&quot;:
+    main()
+</code></pre></details>
+</section>
+
+<section id="qa">
+ <div class="split"><h2><span class="gr">Likely</span> <span class="hl">questions.</span></h2><p>The full set of 43 is in docs/QA.md.</p></div>
+ <div><details class="qa"><summary>Is this real data?</summary><p>The setting is real (SSU FoodBank hours, walk-in). The operating numbers are labelled assumptions, tested across a range in experiments.py.</p></details><details class="qa"><summary>Is the main difference real or noise?</summary><p>84.0 ± 3.2 vs 89.0 ± 2.9 over 20 runs. Compared seed by seed, matched stock wins 16 of 20 runs by 5.0 ± 1.5 points, so the gain is likely real.</p></details><details class="qa"><summary>Where is the Indigenous perspective?</summary><p>The project does not model Indigenous communities. Any adaptation for Aboriginal or Torres Strait Islander students should be led by that community through Swinburne&#x27;s Moondani Toombadool Centre and follow CARE and Maiam nayri Wingara principles.</p></details><details class="qa"><summary>What bug did testing find?</summary><p>The arrivals loop checked closing time before waiting, so one student always arrived after closing. A test caught it; the fix moved the check after the wait.</p></details><details class="qa"><summary>What does req | env.timeout(max_wait) do?</summary><p>The student waits for a volunteer or until patience runs out, whichever happens first.</p></details><details class="qa"><summary>Why one Container per diet?</summary><p>So halal and vegetarian stock can run out on their own. One total would hide the problem the project is about.</p></details></div>
+</section>
+
+<section id="files">
+ <div class="split"><h2>In the <span class="hl">repository.</span></h2><p>Download the package from the chat to get every file.</p></div>
+ <div class="files">
+  <div><code>pantry_sim.py</code>Final program</div><div><code>stages/</code>Stage 1–8, each runnable</div>
+  <div><code>tests/</code>16 pytest tests</div><div><code>experiments.py</code>Sensitivity and timing</div>
+  <div><code>docs/DESIGN.md</code>Decomposition, pseudocode</div><div><code>docs/EVIDENCE.md</code>17 sources, claim by claim</div>
+  <div><code>docs/REFLECTION.md</code>Impact, ethics, tools</div><div><code>docs/*.html</code>pydoc API docs</div>
+ </div>
+</section>
+</div>
+<div class="wrap"><footer><span class="logo">FOODBANK.SIM</span><span>A learning model for COS60018. Not a forecasting tool and not a voice for any community.</span></footer></div>
