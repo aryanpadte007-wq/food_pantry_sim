@@ -1,0 +1,13 @@
+Gap (min)  Baseline %   Matched %
+      3.0    99.8 ±0.3   100.0 ±0.0
+      2.0    95.3 ±1.7    99.1 ±1.1
+      1.5    84.0 ±3.2    89.0 ±2.9
+      1.2    68.3 ±2.6    72.4 ±2.3
+      1.0    56.2 ±2.4    59.9 ±2.1
+
+Matched minus baseline: 5.0 ± 1.5 points; matched better in 16/20 runs
+
+Reps  Seconds  ms/run
+  10    0.013    1.29
+ 100    0.130    1.30
+ 200    0.260    1.30
