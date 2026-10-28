@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Python: module stage1_basic_queue</title>
+</head><body>
+
+<table class="heading">
+<tr class="heading-text decor">
+<td class="title">&nbsp;<br><strong class="title">stage1_basic_queue</strong></td>
+<td class="extra"><a href=".">index</a><br><a href="file:/home/claude/final/v3/pantry_sim/docs/stage1_basic_queue.py">/home/claude/final/v3/pantry_sim/docs/stage1_basic_queue.py</a></td></tr></table>
+    <p><span class="code">Stage&nbsp;1&nbsp;-&nbsp;Basic&nbsp;queue.<br>
+&nbsp;<br>
+Goal:&nbsp;learn&nbsp;the&nbsp;core&nbsp;SimPy&nbsp;idea.&nbsp;Students&nbsp;arrive&nbsp;at&nbsp;random&nbsp;times&nbsp;and<br>
+queue&nbsp;for&nbsp;ONE&nbsp;volunteer.&nbsp;We&nbsp;print&nbsp;what&nbsp;happens.&nbsp;No&nbsp;stock,&nbsp;no&nbsp;statistics.<br>
+&nbsp;<br>
+Concepts&nbsp;shown:&nbsp;generator&nbsp;functions,&nbsp;simpy.Environment,&nbsp;simpy.Resource,<br>
+env.timeout,&nbsp;random&nbsp;arrival&nbsp;times.</span></p>
+<p>
+<table class="section">
+<tr class="decor pkg-content-decor heading-text">
+<td class="section-title" colspan=3>&nbsp;<br><strong class="bigsection">Modules</strong></td></tr>
+    
+<tr><td class="decor pkg-content-decor"><span class="code">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span></td><td>&nbsp;</td>
+<td class="singlecolumn"><table><tr><td class="multicolumn"><a href="random.html">random</a><br>
+</td><td class="multicolumn"><a href="simpy.html">simpy</a><br>
+</td><td class="multicolumn"></td><td class="multicolumn"></td></tr></table></td></tr></table><p>
+<table class="section">
+<tr class="decor functions-decor heading-text">
+<td class="section-title" colspan=3>&nbsp;<br><strong class="bigsection">Functions</strong></td></tr>
+    
+<tr><td class="decor functions-decor"><span class="code">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span></td><td>&nbsp;</td>
+<td class="singlecolumn"><dl><dt><a name="-arrivals"><strong>arrivals</strong></a>(env, counter)</dt><dd><span class="code">Create&nbsp;new&nbsp;students&nbsp;until&nbsp;closing&nbsp;time.</span></dd></dl>
+ <dl><dt><a name="-student"><strong>student</strong></a>(env, sid, counter)</dt><dd><span class="code">One&nbsp;student&nbsp;arrives,&nbsp;waits&nbsp;for&nbsp;the&nbsp;volunteer,&nbsp;gets&nbsp;served,&nbsp;leaves.</span></dd></dl>
+</td></tr></table><p>
+<table class="section">
+<tr class="decor data-decor heading-text">
+<td class="section-title" colspan=3>&nbsp;<br><strong class="bigsection">Data</strong></td></tr>
+    
+<tr><td class="decor data-decor"><span class="code">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span></td><td>&nbsp;</td>
+<td class="singlecolumn"><strong>MEAN_ARRIVAL_GAP</strong> = 1.5<br>
+<strong>MEAN_SERVICE_TIME</strong> = 2.5<br>
+<strong>OPEN_MINUTES</strong> = 30</td></tr></table>
+</body></html>

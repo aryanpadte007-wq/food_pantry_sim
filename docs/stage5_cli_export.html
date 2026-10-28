@@ -1,0 +1,184 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Python: module stage5_cli_export</title>
+</head><body>
+
+<table class="heading">
+<tr class="heading-text decor">
+<td class="title">&nbsp;<br><strong class="title">stage5_cli_export</strong></td>
+<td class="extra"><a href=".">index</a><br><a href="file:/home/claude/final/v3/pantry_sim/docs/stage5_cli_export.py">/home/claude/final/v3/pantry_sim/docs/stage5_cli_export.py</a></td></tr></table>
+    <p><span class="code">Stage&nbsp;5&nbsp;-&nbsp;Command-line&nbsp;options,&nbsp;CSV&nbsp;+&nbsp;chart&nbsp;export.<br>
+&nbsp;<br>
+A&nbsp;small&nbsp;SimPy&nbsp;model&nbsp;of&nbsp;a&nbsp;student-run&nbsp;campus&nbsp;food&nbsp;bank,&nbsp;modelled&nbsp;on&nbsp;the<br>
+Swinburne&nbsp;Student&nbsp;Union&nbsp;(SSU)&nbsp;FoodBank,&nbsp;a&nbsp;free&nbsp;walk-in&nbsp;service&nbsp;open<br>
+10am-1pm&nbsp;on&nbsp;weekdays&nbsp;(180&nbsp;minutes,&nbsp;as&nbsp;used&nbsp;below).<br>
+&nbsp;<br>
+Why&nbsp;this&nbsp;matters:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;Australian&nbsp;research&nbsp;reports&nbsp;food&nbsp;insecurity&nbsp;among&nbsp;university&nbsp;students,<br>
+&nbsp;&nbsp;&nbsp;&nbsp;and&nbsp;a&nbsp;2025&nbsp;study&nbsp;of&nbsp;international&nbsp;students&nbsp;(Leung&nbsp;et&nbsp;al.,&nbsp;Health<br>
+&nbsp;&nbsp;&nbsp;&nbsp;Promotion&nbsp;Journal&nbsp;of&nbsp;Australia)&nbsp;found&nbsp;a&nbsp;lack&nbsp;of&nbsp;culturally&nbsp;appropriate<br>
+&nbsp;&nbsp;&nbsp;&nbsp;food&nbsp;and&nbsp;inefficient&nbsp;pantry&nbsp;operations&nbsp;were&nbsp;key&nbsp;barriers.&nbsp;This&nbsp;program<br>
+&nbsp;&nbsp;&nbsp;&nbsp;lets&nbsp;a&nbsp;food&nbsp;bank&nbsp;coordinator&nbsp;test&nbsp;simple&nbsp;choices&nbsp;-&nbsp;volunteers,&nbsp;stock&nbsp;and<br>
+&nbsp;&nbsp;&nbsp;&nbsp;culturally&nbsp;suitable&nbsp;stock&nbsp;-&nbsp;and&nbsp;see&nbsp;how&nbsp;many&nbsp;students&nbsp;get&nbsp;a&nbsp;parcel<br>
+&nbsp;&nbsp;&nbsp;&nbsp;that&nbsp;meets&nbsp;their&nbsp;needs.<br>
+&nbsp;<br>
+What&nbsp;it&nbsp;is&nbsp;NOT:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;A&nbsp;real&nbsp;forecasting&nbsp;tool.&nbsp;All&nbsp;numbers&nbsp;below&nbsp;are&nbsp;illustrative&nbsp;assumptions<br>
+&nbsp;&nbsp;&nbsp;&nbsp;and&nbsp;should&nbsp;be&nbsp;replaced&nbsp;with&nbsp;real&nbsp;pantry&nbsp;data&nbsp;before&nbsp;drawing&nbsp;conclusions.<br>
+&nbsp;<br>
+Run:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;python&nbsp;pantry_sim.py&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;#&nbsp;compare&nbsp;built-in&nbsp;scenarios<br>
+&nbsp;&nbsp;&nbsp;&nbsp;python&nbsp;pantry_sim.py&nbsp;--volunteers&nbsp;3&nbsp;&nbsp;#&nbsp;run&nbsp;one&nbsp;custom&nbsp;scenario</span></p>
+<p>
+<table class="section">
+<tr class="decor pkg-content-decor heading-text">
+<td class="section-title" colspan=3>&nbsp;<br><strong class="bigsection">Modules</strong></td></tr>
+    
+<tr><td class="decor pkg-content-decor"><span class="code">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span></td><td>&nbsp;</td>
+<td class="singlecolumn"><table><tr><td class="multicolumn"><a href="argparse.html">argparse</a><br>
+<a href="pandas.html">pandas</a><br>
+</td><td class="multicolumn"><a href="random.html">random</a><br>
+<a href="simpy.html">simpy</a><br>
+</td><td class="multicolumn"><a href="statistics.html">statistics</a><br>
+</td><td class="multicolumn"></td></tr></table></td></tr></table><p>
+<table class="section">
+<tr class="decor index-decor heading-text">
+<td class="section-title" colspan=3>&nbsp;<br><strong class="bigsection">Classes</strong></td></tr>
+    
+<tr><td class="decor index-decor"><span class="code">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span></td><td>&nbsp;</td>
+<td class="singlecolumn"><dl>
+<dt class="heading-text"><a href="builtins.html#object">builtins.object</a>
+</dt><dd>
+<dl>
+<dt class="heading-text"><a href="stage5_cli_export.html#Config">Config</a>
+</dt><dt class="heading-text"><a href="stage5_cli_export.html#Pantry">Pantry</a>
+</dt></dl>
+</dd>
+</dl>
+ <p>
+<table class="section">
+<tr class="decor title-decor heading-text">
+<td class="section-title" colspan=3>&nbsp;<br><a name="Config">class <strong>Config</strong></a>(<a href="builtins.html#object">builtins.object</a>)</td></tr>
+    
+<tr><td class="decor title-decor" rowspan=2><span class="code">&nbsp;&nbsp;&nbsp;</span></td>
+<td class="decor title-decor" colspan=2><span class="code"><a href="#Config">Config</a>(<br>
+&nbsp;&nbsp;&nbsp;&nbsp;name:&nbsp;str&nbsp;=&nbsp;'Baseline',<br>
+&nbsp;&nbsp;&nbsp;&nbsp;volunteers:&nbsp;int&nbsp;=&nbsp;2,<br>
+&nbsp;&nbsp;&nbsp;&nbsp;open_minutes:&nbsp;int&nbsp;=&nbsp;180,<br>
+&nbsp;&nbsp;&nbsp;&nbsp;mean_arrival_gap:&nbsp;float&nbsp;=&nbsp;1.5,<br>
+&nbsp;&nbsp;&nbsp;&nbsp;mean_service_time:&nbsp;float&nbsp;=&nbsp;2.5,<br>
+&nbsp;&nbsp;&nbsp;&nbsp;max_wait:&nbsp;float&nbsp;=&nbsp;20.0,<br>
+&nbsp;&nbsp;&nbsp;&nbsp;stock:&nbsp;dict&nbsp;=&nbsp;None,<br>
+&nbsp;&nbsp;&nbsp;&nbsp;seed:&nbsp;int&nbsp;=&nbsp;42<br>
+)&nbsp;-&amp;gt;&nbsp;None<br>
+&nbsp;<br>
+All&nbsp;settings&nbsp;for&nbsp;one&nbsp;simulation&nbsp;run&nbsp;(times&nbsp;are&nbsp;in&nbsp;minutes).<br>&nbsp;</span></td></tr>
+<tr><td>&nbsp;</td>
+<td class="singlecolumn">Methods defined here:<br>
+<dl><dt><a name="Config-__eq__"><strong>__eq__</strong></a>(self, other)</dt><dd><span class="code">Return&nbsp;self==value.</span></dd></dl>
+
+<dl><dt><a name="Config-__init__"><strong>__init__</strong></a>(
+    self,
+    name: str = 'Baseline',
+    volunteers: int = 2,
+    open_minutes: int = 180,
+    mean_arrival_gap: float = 1.5,
+    mean_service_time: float = 2.5,
+    max_wait: float = 20.0,
+    stock: dict = None,
+    seed: int = 42
+) -&gt; None</dt><dd><span class="code">Initialize&nbsp;self.&nbsp;&nbsp;See&nbsp;help(type(self))&nbsp;for&nbsp;accurate&nbsp;signature.</span></dd></dl>
+
+<dl><dt><a name="Config-__post_init__"><strong>__post_init__</strong></a>(self)</dt></dl>
+
+<dl><dt><a name="Config-__replace__"><strong>__replace__</strong></a> = _replace(self, /, **changes)<span class="grey"><span class="heading-text"> from <a href="dataclasses.html">dataclasses</a></span></span></dt></dl>
+
+<dl><dt><a name="Config-__repr__"><strong>__repr__</strong></a>(self)</dt><dd><span class="code">Return&nbsp;repr(self).</span></dd></dl>
+
+<hr>
+Data descriptors defined here:<br>
+<dl><dt><strong>__dict__</strong></dt>
+<dd><span class="code">dictionary&nbsp;for&nbsp;instance&nbsp;variables</span></dd>
+</dl>
+<dl><dt><strong>__weakref__</strong></dt>
+<dd><span class="code">list&nbsp;of&nbsp;weak&nbsp;references&nbsp;to&nbsp;the&nbsp;object</span></dd>
+</dl>
+<hr>
+Data and other attributes defined here:<br>
+<dl><dt><strong>__annotations__</strong> = {'max_wait': &lt;class 'float'&gt;, 'mean_arrival_gap': &lt;class 'float'&gt;, 'mean_service_time': &lt;class 'float'&gt;, 'name': &lt;class 'str'&gt;, 'open_minutes': &lt;class 'int'&gt;, 'seed': &lt;class 'int'&gt;, 'stock': &lt;class 'dict'&gt;, 'volunteers': &lt;class 'int'&gt;}</dl>
+
+<dl><dt><strong>__dataclass_fields__</strong> = {'max_wait': Field(name='max_wait',type=&lt;class 'float'&gt;,defau...appingproxy({}),kw_only=False,_field_type=_FIELD), 'mean_arrival_gap': Field(name='mean_arrival_gap',type=&lt;class 'float...appingproxy({}),kw_only=False,_field_type=_FIELD), 'mean_service_time': Field(name='mean_service_time',type=&lt;class 'floa...appingproxy({}),kw_only=False,_field_type=_FIELD), 'name': Field(name='name',type=&lt;class 'str'&gt;,default='Ba...appingproxy({}),kw_only=False,_field_type=_FIELD), 'open_minutes': Field(name='open_minutes',type=&lt;class 'int'&gt;,def...appingproxy({}),kw_only=False,_field_type=_FIELD), 'seed': Field(name='seed',type=&lt;class 'int'&gt;,default=42,...appingproxy({}),kw_only=False,_field_type=_FIELD), 'stock': Field(name='stock',type=&lt;class 'dict'&gt;,default=N...appingproxy({}),kw_only=False,_field_type=_FIELD), 'volunteers': Field(name='volunteers',type=&lt;class 'int'&gt;,defau...appingproxy({}),kw_only=False,_field_type=_FIELD)}</dl>
+
+<dl><dt><strong>__dataclass_params__</strong> = _DataclassParams(init=True,repr=True,eq=True,ord...rue,kw_only=False,slots=False,weakref_slot=False)</dl>
+
+<dl><dt><strong>__hash__</strong> = None</dl>
+
+<dl><dt><strong>__match_args__</strong> = ('name', 'volunteers', 'open_minutes', 'mean_arrival_gap', 'mean_service_time', 'max_wait', 'stock', 'seed')</dl>
+
+<dl><dt><strong>max_wait</strong> = 20.0</dl>
+
+<dl><dt><strong>mean_arrival_gap</strong> = 1.5</dl>
+
+<dl><dt><strong>mean_service_time</strong> = 2.5</dl>
+
+<dl><dt><strong>name</strong> = 'Baseline'</dl>
+
+<dl><dt><strong>open_minutes</strong> = 180</dl>
+
+<dl><dt><strong>seed</strong> = 42</dl>
+
+<dl><dt><strong>stock</strong> = None</dl>
+
+<dl><dt><strong>volunteers</strong> = 2</dl>
+
+</td></tr></table> <p>
+<table class="section">
+<tr class="decor title-decor heading-text">
+<td class="section-title" colspan=3>&nbsp;<br><a name="Pantry">class <strong>Pantry</strong></a>(<a href="builtins.html#object">builtins.object</a>)</td></tr>
+    
+<tr><td class="decor title-decor" rowspan=2><span class="code">&nbsp;&nbsp;&nbsp;</span></td>
+<td class="decor title-decor" colspan=2><span class="code"><a href="#Pantry">Pantry</a>(env,&nbsp;cfg)<br>
+&nbsp;<br>
+The&nbsp;pantry:&nbsp;a&nbsp;counter&nbsp;(volunteers)&nbsp;plus&nbsp;food&nbsp;stock&nbsp;per&nbsp;diet&nbsp;group.<br>&nbsp;</span></td></tr>
+<tr><td>&nbsp;</td>
+<td class="singlecolumn">Methods defined here:<br>
+<dl><dt><a name="Pantry-__init__"><strong>__init__</strong></a>(self, env, cfg)</dt><dd><span class="code">Initialize&nbsp;self.&nbsp;&nbsp;See&nbsp;help(type(self))&nbsp;for&nbsp;accurate&nbsp;signature.</span></dd></dl>
+
+<dl><dt><a name="Pantry-serve"><strong>serve</strong></a>(self, diet)</dt><dd><span class="code">Pack&nbsp;a&nbsp;parcel.&nbsp;Returns&nbsp;the&nbsp;outcome&nbsp;as&nbsp;a&nbsp;short&nbsp;string.</span></dd></dl>
+
+<hr>
+Data descriptors defined here:<br>
+<dl><dt><strong>__dict__</strong></dt>
+<dd><span class="code">dictionary&nbsp;for&nbsp;instance&nbsp;variables</span></dd>
+</dl>
+<dl><dt><strong>__weakref__</strong></dt>
+<dd><span class="code">list&nbsp;of&nbsp;weak&nbsp;references&nbsp;to&nbsp;the&nbsp;object</span></dd>
+</dl>
+</td></tr></table></td></tr></table><p>
+<table class="section">
+<tr class="decor functions-decor heading-text">
+<td class="section-title" colspan=3>&nbsp;<br><strong class="bigsection">Functions</strong></td></tr>
+    
+<tr><td class="decor functions-decor"><span class="code">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span></td><td>&nbsp;</td>
+<td class="singlecolumn"><dl><dt><a name="-arrivals"><strong>arrivals</strong></a>(env, pantry)</dt><dd><span class="code">Generate&nbsp;students&nbsp;until&nbsp;closing&nbsp;time.</span></dd></dl>
+ <dl><dt><a name="-default_scenarios"><strong>default_scenarios</strong></a>()</dt><dd><span class="code">A&nbsp;few&nbsp;'what&nbsp;if'&nbsp;settings&nbsp;a&nbsp;pantry&nbsp;coordinator&nbsp;might&nbsp;test.</span></dd></dl>
+ <dl><dt><a name="-main"><strong>main</strong></a>(argv=None)</dt><dd><span class="code">Entry&nbsp;point:&nbsp;run&nbsp;scenarios,&nbsp;print&nbsp;a&nbsp;table,&nbsp;save&nbsp;CSV&nbsp;and&nbsp;chart.</span></dd></dl>
+ <dl><dt><a name="-parse_args"><strong>parse_args</strong></a>(argv=None)</dt><dd><span class="code">Read&nbsp;command-line&nbsp;options&nbsp;for&nbsp;a&nbsp;custom&nbsp;scenario.</span></dd></dl>
+ <dl><dt><a name="-pick_diet"><strong>pick_diet</strong></a>()</dt><dd><span class="code">Randomly&nbsp;choose&nbsp;a&nbsp;diet&nbsp;group&nbsp;using&nbsp;DIET_SHARES.</span></dd></dl>
+ <dl><dt><a name="-plot"><strong>plot</strong></a>(results, path='results.png')</dt><dd><span class="code">Save&nbsp;a&nbsp;stacked&nbsp;bar&nbsp;chart&nbsp;of&nbsp;outcomes&nbsp;per&nbsp;scenario.</span></dd></dl>
+ <dl><dt><a name="-run"><strong>run</strong></a>(cfg)</dt><dd><span class="code">Run&nbsp;one&nbsp;scenario&nbsp;and&nbsp;return&nbsp;a&nbsp;DataFrame&nbsp;of&nbsp;student&nbsp;records.</span></dd></dl>
+ <dl><dt><a name="-run_replications"><strong>run_replications</strong></a>(cfg, reps=20)</dt><dd><span class="code">Repeat&nbsp;a&nbsp;scenario&nbsp;with&nbsp;different&nbsp;seeds&nbsp;and&nbsp;average&nbsp;the&nbsp;results.<br>
+&nbsp;<br>
+One&nbsp;random&nbsp;run&nbsp;can&nbsp;be&nbsp;lucky&nbsp;or&nbsp;unlucky;&nbsp;averaging&nbsp;gives&nbsp;a&nbsp;fairer&nbsp;view.</span></dd></dl>
+ <dl><dt><a name="-student"><strong>student</strong></a>(env, sid, pantry)</dt><dd><span class="code">One&nbsp;student:&nbsp;arrive,&nbsp;queue&nbsp;(or&nbsp;give&nbsp;up),&nbsp;get&nbsp;a&nbsp;parcel,&nbsp;leave.</span></dd></dl>
+ <dl><dt><a name="-summarise"><strong>summarise</strong></a>(cfg, df)</dt><dd><span class="code">Turn&nbsp;raw&nbsp;records&nbsp;into&nbsp;the&nbsp;key&nbsp;numbers&nbsp;a&nbsp;coordinator&nbsp;cares&nbsp;about.</span></dd></dl>
+</td></tr></table><p>
+<table class="section">
+<tr class="decor data-decor heading-text">
+<td class="section-title" colspan=3>&nbsp;<br><strong class="bigsection">Data</strong></td></tr>
+    
+<tr><td class="decor data-decor"><span class="code">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span></td><td>&nbsp;</td>
+<td class="singlecolumn"><strong>DIET_SHARES</strong> = {'general': 0.55, 'halal': 0.2, 'vegetarian': 0.25}</td></tr></table>
+</body></html>

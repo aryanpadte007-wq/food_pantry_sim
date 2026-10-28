@@ -1,0 +1,17 @@
+flowchart TD
+    A([Start run]) --> B[Load Config<br/>validate settings]
+    B --> C[Create Environment,<br/>Pantry counter + stock]
+    C --> D{{Arrivals loop}}
+    D -->|wait random gap| E{Doors still open?}
+    E -- No --> Z([Stop new arrivals])
+    E -- Yes --> F[New student<br/>pick diet]
+    F --> D
+    F --> G{Volunteer free<br/>before max_wait?}
+    G -- No --> H[outcome = gave_up]
+    G -- Yes --> I[Pack parcel]
+    I --> J{Stock for<br/>their diet?}
+    J -- Yes --> K[outcome = suitable]
+    J -- No --> L{General stock left<br/>and diet not general?}
+    L -- Yes --> M[outcome = unsuitable]
+    L -- No --> N[outcome = no_food]
+    H & K & M & N --> O[Save record]
